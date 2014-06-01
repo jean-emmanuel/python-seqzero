@@ -23,7 +23,7 @@ class pyOSCseq(object):
         self.cursor = 0
         while self.is_playing:
             for name in self.sequences:
-                self.parseArgs(self.sequences[name].getArgs(self.cursor))
+                self.parseOscArgs(self.sequences[name].getArgs(self.cursor))
             self.cursor += 1
             sleep(60./self.bpm)
             
@@ -42,10 +42,10 @@ class pyOSCseq(object):
     @_liblo.make_method('/Sequencer/Scene/Play', 's')
     def play_scene(self,path,args):
         if not args[0] in self.scenes:   
-            self.scenes[args[0]] = threading.Thread(target=scenes_list, args=([self.parseArgs,args[0]]))
+            self.scenes[args[0]] = threading.Thread(target=scenes_list, args=([self.parseOscArgs,args[0]]))
             self.scenes[args[0]].start()
         if not self.scenes[args[0]].is_alive():
-            self.scenes[args[0]] = threading.Thread(target=scenes_list, args=([self.parseArgs,args[0]]))
+            self.scenes[args[0]] = threading.Thread(target=scenes_list, args=([self.parseOscArgs,args[0]]))
             self.scenes[args[0]].start()
 
         
@@ -63,7 +63,7 @@ class pyOSCseq(object):
     def addClip(self,name,events):
         self.clips[name] = self.clip(self,name,events)
         
-    def parseArgs(self,args):
+    def parseOscArgs(self,args):
 
         if not args:
             return
