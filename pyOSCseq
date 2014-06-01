@@ -1,5 +1,0 @@
-
-
-class pyOSCseq(object):
-    def __init__(self:
-        self.port = port
