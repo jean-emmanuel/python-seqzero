@@ -18,7 +18,7 @@ computed between 'start' and 'end'.
 - duration (s) : time to complete the animation
 - step (s) : delay between each step
 - function : function to animate, most likely 'send' (which is an alias for pyOSCseq.parseOscArgs()
-- args : tuple containing the first arguments passed to the function
+- args : tuple containing the first arguments passed to the function (these won't be animated)
 """
 def animate(start,end,duration,step,function,args):
     def threaded(start,end,duration,step,function,args):
@@ -44,7 +44,7 @@ def scenes_list(send, name):
     if name == 'Intro_init':
         #Loading slides
         suffix = '.generique.state'
-        send([[load,'s0.featuring'+suffix],[load,'s1.jaquie.body'+suffix],[load,'s2.michel.body'+suffix],[load,'s3.michel.head'+suffix],[load,'s5.jaquie.head'+suffix],[load,'s7.the.nots.awful.geminos'+suffix],[load,'s0.featuring'+suffix]])
+        send([[load,'s0.featuring'+suffix],[load,'s1.jaquie.body'+suffix],[load,'s2.michel.body'+suffix],[load,'s3.michel.head'+suffix],[load,'s5.jaquie.head'+suffix],[load,'s7.the.nots.awful.geminos'+suffix]])
          
     if name == 'Intro_generique':
         #Generique
@@ -52,7 +52,10 @@ def scenes_list(send, name):
         for i in [0,1,2,3,5,7]:
             send([visible,i,1])
         """
-
+        print "a"
+        sleep(1)
+        print "b"
+        sleep(1)
         animate(-1000,0,.2,.02,send,[position_x,0])
         
 

@@ -1,8 +1,9 @@
 from time import sleep 
 import liblo as _liblo
-import threading
+from kthread import KThread
 from scenes import scenes_list
 
+       
 class pyOSCseq(object):
     def __init__(self,bpm,port,target):
         self.bpm = bpm
@@ -42,20 +43,19 @@ class pyOSCseq(object):
     @_liblo.make_method('/Sequencer/Scene/Play', 's')
     def play_scene(self,path,args):
         if not args[0] in self.scenes:   
-            self.scenes[args[0]] = threading.Thread(target=scenes_list, args=([self.parseOscArgs,args[0]]))
+            self.scenes[args[0]] = KThread(target=scenes_list, args=([self.parseOscArgs,args[0]]))
             self.scenes[args[0]].start()
         if not self.scenes[args[0]].is_alive():
-            self.scenes[args[0]] = threading.Thread(target=scenes_list, args=([self.parseOscArgs,args[0]]))
+            self.scenes[args[0]] = KThread(target=scenes_list, args=([self.parseOscArgs,args[0]]))
             self.scenes[args[0]].start()
 
-        
-    @_liblo.make_method('/Sequence/Clip/Stop', 's')
-    def stop_clip(self,path,args):
-        self.clips[args[0]].stop()
+    @_liblo.make_method('/Sequencer/Scene/Stop', 's')
+    def stop_scene(self,path,args):
+        self.scenes[args[0]].kill()
         
     @_liblo.make_method('/test', None)
     def test(self,path,args):
-        print args
+        print 'Test : ' + str(args)
             
     def addSequence(self,name,events):
         self.sequences[name] = self.sequence(self,name,events)
@@ -113,6 +113,7 @@ seq = pyOSCseq(640,123451,'192.168.1.82:56418 192.168.1.82:7770 localhost:5555')
 seq.addSequence('aa',[
 
     [':/Sequencer/Scene/Play', 'Intro_generique'],
+    [':/Sequencer/Scene/Stop', 'Intro_generique'],
     [':/Sequencer/Sequence/Stop', 'aa']
 
 ])
