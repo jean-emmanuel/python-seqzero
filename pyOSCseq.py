@@ -93,7 +93,7 @@ class pyOSCseq(object):
             self.name = name
             self.events = events
             self.beats = len(self.events)
-            self.is_playing = True
+            self.is_playing = False
             
         def getArgs(self,cursor):
             if not self.is_playing:

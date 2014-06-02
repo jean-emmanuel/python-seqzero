@@ -36,6 +36,10 @@ def animate(start,end,duration,step,function,args):
     t = Thread(target=threaded, args=([start,end,duration,step,function,args]))
     t.start()
 
+"""
+Repeat function for pyOSCseq's osc sending method :
+Execute the given function nb_repeat times, and waits interval seconds between each call
+"""
 def repeat(nb_repeat,interval,function,args):
     def threaded(nb_repeat,interval,function,args):
         for i in range(nb_repeat):
