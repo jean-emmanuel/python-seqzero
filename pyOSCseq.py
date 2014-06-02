@@ -32,13 +32,9 @@ class pyOSCseq(object):
     def stop(self):
         self.is_playing = 0
         
-    @_liblo.make_method('/Sequencer/Sequence/Play', 's')
-    def play_sequence(self,path,args):
-        self.sequences[args[0]].play()
-        
-    @_liblo.make_method('/Sequencer/Sequence/Stop', 's')
-    def stop_sequence(self,path,args):
-        self.sequences[args[0]].stop()
+    @_liblo.make_method('/Sequencer/Sequence/Enable', 'si')
+    def enable_sequence(self,path,args):
+        self.sequences[args[0]].enable(args[1])
     
     @_liblo.make_method('/Sequencer/Scene/Play', 's')
     def play_scene(self,path,args):
@@ -100,7 +96,5 @@ class pyOSCseq(object):
                 return False
             return self.events[cursor%self.beats]
                 
-        def play(self):
-            self.is_playing = True
-        def stop(self):
-            self.is_playing = False
+        def enable(self,x):
+            self.is_playing = bool(x)
