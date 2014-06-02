@@ -1,4 +1,4 @@
-# KThread.py: A killable Thread implementation.
+# KThread.py: A killable Thread implementation. By Connelly Barnes
 
 import sys
 import trace
