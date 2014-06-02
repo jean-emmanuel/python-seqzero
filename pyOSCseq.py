@@ -52,6 +52,7 @@ class pyOSCseq(object):
     @_liblo.make_method('/Sequencer/Scene/Stop', 's')
     def stop_scene(self,path,args):
         self.scenes[args[0]].kill()
+        del self.scenes[args[0]]
         
     @_liblo.make_method('/test', None)
     def test(self,path,args):
@@ -110,12 +111,9 @@ seq = pyOSCseq(640,123451,'192.168.1.82:56418 192.168.1.82:7770 localhost:5555')
 
 
 
-seq.addSequence('aa',[
-
+seq.addSequence('test',[
     [':/Sequencer/Scene/Play', 'Intro_generique'],
-    [':/Sequencer/Scene/Stop', 'Intro_generique'],
-    [':/Sequencer/Sequence/Stop', 'aa']
-
+    [':/Sequencer/Sequence/Stop', 'test']
 ])
 
 seq.play()
