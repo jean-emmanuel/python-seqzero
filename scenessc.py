@@ -67,19 +67,22 @@ def scenes_list(send, name):
 
         animate(-1000,0,.2,.02,send,[position_x,0])
         
-        sleep(0.3)
-        
-        for i in [1,2,3,5]:
-            repeat(10,.2,send,[translate_x,i,-84])
-        
-        sleep(0.15)
-        
-        animate(100,200,.1,.02,send,[position_y,0])
-        
         sleep(1)
         
+        for i in [1,2,3,5]:
+            repeat(100,.015,send,[translate_x,i,-8.4])
+        
+        sleep(0.15)
+
+        
+        animate(100,200,.1,.02,send,[position_y,0])
+
+        sleep(1)
+        
+
+        
         for i in [2,3]:
-            repeat(12,.2,send,[translate_x,i,-10])
+            repeat(120,.015,send,[translate_x,i,-1])
         
         sleep(1.8)
         
