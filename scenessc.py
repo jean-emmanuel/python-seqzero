@@ -53,7 +53,9 @@ Scenes list
 The 'send' argument retrieves pyOSCseq osc sending function to dispatch the messages.
     usage : send([path,arg1,arg2])
 """
-def scenes_list(send, name):
+
+# Vidéos
+def v_scenes_list(send, name):
     if name == 'Intro_init':
         #Loading slides
         suffix = '.generique.state'
@@ -89,3 +91,6 @@ def scenes_list(send, name):
         animate(0,1,.3,.01,send,[alpha,7])
         
 
+# Lights
+def l_scenes_list(send, name):
+    pass
