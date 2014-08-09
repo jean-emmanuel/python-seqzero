@@ -23,17 +23,19 @@ computed between 'start' and 'end'.
 - function : function to animate, most likely 'send' (which is an alias for pyOSCseq.parseOscArgs()
 - args : tuple containing the first arguments passed to the function (these won't be animated)
 """
-def animate(start,end,duration,step,function,args):
-    def threaded(start,end,duration,step,function,args):
+def animate(start,end,duration,step,function,args, mode='float'):
+    def threaded(start,end,duration,step,function,args, mode):
         nb_step = int(round(duration/step))
         a = float(end-start)/nb_step
         args.append(0)
         for i in range(nb_step+1):
             args[-1] = a*i+start
+            if mode == 'integer':
+                args[-1] = int(args[-1])
             function([args])
             if i!=nb_step:
                 sleep(step)
-    t = Thread(target=threaded, args=([start,end,duration,step,function,args]))
+    t = Thread(target=threaded, args=([start,end,duration,step,function,args, mode]))
     t.start()
 
 """
@@ -54,7 +56,7 @@ The 'send' argument retrieves pyOSCseq osc sending function to dispatch the mess
     usage : send([path,arg1,arg2])
 """
 
-# Vidéos
+# Videos
 def v_scenes_list(send, name):
     if name == 'Intro_init':
         #Loading slides
@@ -93,4 +95,6 @@ def v_scenes_list(send, name):
 
 # Lights
 def l_scenes_list(send, name):
-    pass
+    if name == 'Debut First Lights - Purple Fade In':
+#        animate(0, 100, 2, 0.02, send,['/CJ/Red/Segment/1'], 'integer')
+        animate(0, 100, 2, 0.02, send,['/CJ/Red/Segment/1'])
