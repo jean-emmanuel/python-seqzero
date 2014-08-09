@@ -31,6 +31,11 @@ class pyOSCseq(object):
     @_liblo.make_method('/Sequencer/Stop', 'f')
     def stop(self):
         self.is_playing = 0
+
+    @_liblo.make_method('/Sequencer/Set_bpm', 'i')
+    def set_bpm(self, path, args):
+        print args[0]
+        self.bpm = args[0]
         
     @_liblo.make_method('/Sequencer/Sequence/Enable', 'si')
     def enable_sequence(self,path,args):
