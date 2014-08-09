@@ -95,6 +95,26 @@ def v_scenes_list(send, name):
 
 # Lights
 def l_scenes_list(send, name):
-    if name == 'Debut First Lights - Purple Fade In':
-#        animate(0, 100, 2, 0.02, send,['/CJ/Red/Segment/1'], 'integer')
-        animate(0, 100, 2, 0.02, send,['/CJ/Red/Segment/1'])
+    # Acte I ##############################
+    # Intro
+    if name == 'Intro':
+        # Flash
+        send(['/BJ/White/Segment/All', 255])
+        send(['/BC/White/Segment/All', 255])
+        sleep(0.04)
+        send(['/BJ/White/Segment/All', 0])
+        send(['/BC/White/Segment/All', 0])
+
+
+        sleep(5)
+        # Allumage Violet
+        animate(0, 100, 4, 0.04, send,['/CJ/Red/Segment/1'], 'integer')
+        animate(0, 100, 4, 0.04, send,['/CC/Red/Segment/1'], 'integer')
+        animate(0, 100, 4, 0.04, send,['/CJ/Blue/Segment/1'], 'integer')
+        animate(0, 100, 4, 0.04, send,['/CC/Blue/Segment/1'], 'integer')
+
+        sleep(5)
+        # Allumage decoupes
+        animate(0, 150, 4, 0.04, send, ['/Decoupes/Cour/Dimmer'], 'integer')
+        animate(0, 150, 4, 0.04, send, ['/Decoupes/Jardin/Dimmer'], 'integer')
+
