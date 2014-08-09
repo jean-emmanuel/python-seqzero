@@ -106,15 +106,43 @@ def l_scenes_list(send, name):
         send(['/BC/White/Segment/All', 0])
 
 
-        sleep(5)
+        sleep(22.905)
         # Allumage Violet
         animate(0, 100, 4, 0.04, send,['/CJ/Red/Segment/1'], 'integer')
         animate(0, 100, 4, 0.04, send,['/CC/Red/Segment/1'], 'integer')
         animate(0, 100, 4, 0.04, send,['/CJ/Blue/Segment/1'], 'integer')
         animate(0, 100, 4, 0.04, send,['/CC/Blue/Segment/1'], 'integer')
 
-        sleep(5)
+        sleep(10)
         # Allumage decoupes
         animate(0, 150, 4, 0.04, send, ['/Decoupes/Cour/Dimmer'], 'integer')
         animate(0, 150, 4, 0.04, send, ['/Decoupes/Jardin/Dimmer'], 'integer')
 
+    # Entree des Geminos
+    if name == 'Entree Geminos':
+        send(['/CJ/Red/Segment/1', 100])
+        send(['/CC/Red/Segment/1', 100])        
+        send(['/CJ/Blue/Segment/1', 100])
+        send(['/CC/Blue/Segment/1', 100])        
+        send(['/CJ/Red/Segment/8', 100])
+        send(['/CC/Red/Segment/8', 100])        
+        send(['/CJ/Blue/Segment/8', 100])
+        send(['/CC/Blue/Segment/8', 100])
+
+        send(['/Decoupes/Jardin/Dimmer', 0])
+        send(['/Decoupes/Cour/Dimmer', 0])
+
+# Audio
+def a_scenes_list(send, name):
+    if name == 'Intro':
+        send(['/Sequencer/Intro', 127])
+        #send(['/pedalBoard/button', 4])
+
+        sleep(22.909)
+        send(['/pedalBoard/button', 2])        
+
+# Main
+def m_scenes_list(send, name):
+    if name == "Debut":
+        send(['/Sequencer/Play'])
+        send(['/Sequencer/Scene/Play', 'Intro'])

@@ -27,6 +27,7 @@ class pyOSCseq(object):
                 self.parseOscArgs(self.sequences[name].getArgs(self.cursor))
             self.cursor += 1
             sleep(60./self.bpm)
+            print self.bpm
             
     @_liblo.make_method('/Sequencer/Stop', 'f')
     def stop(self):
