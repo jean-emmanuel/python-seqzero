@@ -31,12 +31,12 @@ l_seq.addSequence('FSF Bourrin',[
     ['/BC/White/Segment/1', 0],
     ['/BC/White/Segment/1', 20],
     ['/BC/White/Segment/1', 0],
-    ['/BC/White/Segment/1', 255],
+    ['/CJ/White/Segment/All', 255],
+    [['/CC/White/Segment/All', 255], ['/CJ/White/Segment/All', 0]],
+    [['/CC/White/Segment/All', 0],['/BC/White/Segment/1', 255]],
     ['/BC/White/Segment/1', 0],
-    ['/BC/White/Segment/1', 20],
-    ['/BC/White/Segment/1', 0],
-    ['/BC/White/Segment/1', 20],
-    ['/BC/White/Segment/1', 0],
+    ['/CJ/White/Segment/All', 255],
+    [['/CC/White/Segment/All', 255], ['/CJ/White/Segment/All', 0]],
 ])
 
 
