@@ -25,7 +25,6 @@ class pyOSCseq(object):
         self.cursor = 0
         while self.is_playing:
             debut = time()
-            print self.cursor
             for name in self.sequences:
                 self.parseOscArgs(self.sequences[name].getArgs(self.cursor))
             self.cursor += 1
