@@ -1,7 +1,7 @@
 from pyOSCseq import *
 from scenessc import l_scenes_list
 
-l_seq = pyOSCseq(150,12345,'localhost:7770 localhost:5555',l_scenes_list)
+l_seq = pyOSCseq(440,12345,'localhost:7770',l_scenes_list)
 
 
 ################# Acte I ##############################
@@ -10,7 +10,33 @@ l_seq = pyOSCseq(150,12345,'localhost:7770 localhost:5555',l_scenes_list)
 
 l_seq.addSequence('FSF Bourrin',[
     ['/BC/White/Segment/1', 255],
-    ['/BC/White/Segment/1', 0]
+    ['/BC/White/Segment/1', 0],
+    ['/BC/White/Segment/1', 20],
+    ['/BC/White/Segment/1', 0],
+    ['/BC/White/Segment/1', 20],
+    ['/BC/White/Segment/1', 0],
+    ['/BC/White/Segment/1', 255],
+    ['/BC/White/Segment/1', 0],
+    ['/BC/White/Segment/1', 20],
+    ['/BC/White/Segment/1', 0],
+    ['/BC/White/Segment/1', 20],
+    ['/BC/White/Segment/1', 0],
+    ['/BC/White/Segment/1', 255],
+    ['/BC/White/Segment/1', 0],
+    ['/BC/White/Segment/1', 20],
+    ['/BC/White/Segment/1', 0],
+    ['/BC/White/Segment/1', 20],
+    ['/BC/White/Segment/1', 0],
+    ['/BC/White/Segment/1', 20],
+    ['/BC/White/Segment/1', 0],
+    ['/BC/White/Segment/1', 20],
+    ['/BC/White/Segment/1', 0],
+    ['/BC/White/Segment/1', 255],
+    ['/BC/White/Segment/1', 0],
+    ['/BC/White/Segment/1', 20],
+    ['/BC/White/Segment/1', 0],
+    ['/BC/White/Segment/1', 20],
+    ['/BC/White/Segment/1', 0],
 ])
 
 

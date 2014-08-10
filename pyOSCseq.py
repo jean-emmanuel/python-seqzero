@@ -1,4 +1,4 @@
-from time import sleep 
+from time import sleep , time
 import liblo as _liblo
 from kthread import KThread
 
@@ -13,6 +13,7 @@ class pyOSCseq(object):
         self.sequences = {}
         self.scenes = {}
         self.scenes_list = scenes_list
+        self.trigger = 0
          
         self.server = _liblo.ServerThread(self.port)
         self.server.register_methods(self)
@@ -23,14 +24,27 @@ class pyOSCseq(object):
         self.is_playing = 1
         self.cursor = 0
         while self.is_playing:
+            debut = time()
+            print self.cursor
             for name in self.sequences:
                 self.parseOscArgs(self.sequences[name].getArgs(self.cursor))
             self.cursor += 1
-            sleep(60./self.bpm)
+            while time() - debut < 60./self.bpm and self.trigger == 0:
+                pass
+            if self.trigger == 1:
+                print "youpi"
+                self.cursor = 0
+                self.trigger = 0
+            #sleep(60./self.bpm - debut + time())
             
     @_liblo.make_method('/Sequencer/Stop', 'f')
     def stop(self):
         self.is_playing = 0
+
+    @_liblo.make_method('/Sequencer/Trigger', 'i')
+    def trig(self):
+        self.trigger = 1
+
 
     @_liblo.make_method('/Sequencer/Set_bpm', 'i')
     def set_bpm(self, path, args):
