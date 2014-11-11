@@ -132,6 +132,81 @@ def l_scenes_list(send, name):
         send(['/Decoupes/Jardin/Dimmer', 0])
         send(['/Decoupes/Cour/Dimmer', 0])
 
+    # Couplet
+    if name == 'Couplet CC':
+        sleep(0.15)
+        animate(0, 180, 1.6, 0.02, send, ['/CC/Red/Segment/All'], 'integer')
+        animate(0, 180, 0.9, 0.02, send, ['/CC/Blue/Segment/All'], 'integer')
+        sleep(1)
+        animate(180, 0, 0.5, 0.02, send, ['/CC/Blue/Segment/All'], 'integer')
+        animate(180, 0, 0.15, 0.02, send, ['/CC/Red/Segment/All'], 'integer')
+    if name == 'Couplet CJ':
+        sleep(0.15)
+        animate(180, 0, 1.6, 0.02, send, ['/CJ/Red/Segment/All'], 'integer')
+        animate(180, 0, 0.9, 0.02, send, ['/CJ/Blue/Segment/All'], 'integer')
+        sleep(1)
+        animate(0, 180, 0.5, 0.02, send, ['/CJ/Blue/Segment/All'], 'integer')
+        animate(0, 180, 0.15, 0.02, send, ['/CJ/Red/Segment/All'], 'integer')
+
+
+    if name == 'AI MathoMag II':
+        sleep(0.875)
+        send(['/CC/White/Segment/All', 255])
+        send(['/CJ/White/Segment/All', 255])
+        sleep(0.125)
+        send(['/CC/White/Segment/All', 0])
+        send(['/CJ/White/Segment/All', 0])
+        sleep(1)
+        for i in range(4):
+            send(['/BC/White/Segment/All', 255])
+            send(['/BJ/White/Segment/All', 255])
+            sleep(0.125)
+            send(['/BC/White/Segment/All', 0])
+            send(['/BJ/White/Segment/All', 0])
+            sleep(4)
+
+    if name == 'AII HG2':
+        for s in ['CC','CJ','BC','BJ']:
+            send(['/'+s+'/White/Segment/All',255])
+        sleep(.2)
+        for s in ['CC','CJ','BC','BJ']:
+            animate(255, 0, 1, 0.02, send, ['/'+s+'/White/Segment/All'], 'integer')
+        for s in ['CC','CJ','BC','BJ']:
+            animate(255, 0, 12.4, 0.4, send, ['/'+s+'/Blue/Segment/All'], 'integer')
+        sleep(12.4)
+        for s in ['CC','CJ','BC','BJ']:
+            send(['/'+s+'/Blue/Segment/All',0])
+        sleep(1.2)
+        for s in ['CC','CJ','BC','BJ']:
+            send(['/'+s+'/Blue/Segment/All',255])
+            send(['/'+s+'/White/Segment/All',255])
+    	sleep(0.2)
+        for s in ['CC','CJ','BC','BJ']:
+            send(['/'+s+'/White/Segment/All',0])
+        sleep(0.2)
+        for s in ['CC','CJ','BC','BJ']:
+            send(['/'+s+'/White/Segment/All',255])
+    	sleep(0.2)
+
+        send([':/Sequencer/Trigger', 1])
+        send([':/Sequencer/Set_bpm', 600])
+        send([':/Sequencer/Sequence/Enable', 'AII HGII', 1])
+
+	if name == 'AII MEP':
+		send(['/CJ/Blue/Segment/All', 180])
+		send(['/CJ/Blue/Segment/8', 240])
+		sleep(0.4)
+		send(['/CC/Blue/Segment/All', 180])
+		send(['/CC/Blue/Segment/8', 240])
+		sleep(0.4)
+		send(['/BJ/Blue/Segment/All', 180])
+		send(['/BJ/Blue/Segment/8', 240])
+		sleep(0.4)
+		send(['/BC/Blue/Segment/All', 180])
+		send(['/BC/Blue/Segment/8', 240])
+		sleep(0.2)
+		send(['/Decoupes/Jeannot/Dimmer', 255])
+
 # Audio
 def a_scenes_list(send, name):
     if name == 'Intro':

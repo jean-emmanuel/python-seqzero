@@ -25,13 +25,13 @@ class pyOSCseq(object):
         self.cursor = 0
         while self.is_playing:
             debut = time()
+            #print "c: " + str(self.cursor) + " / " + str(time())
             for name in self.sequences:
                 self.parseOscArgs(self.sequences[name].getArgs(self.cursor))
             self.cursor += 1
             while time() - debut < 60./self.bpm and self.trigger == 0:
                 pass
             if self.trigger == 1:
-                print "youpi"
                 self.cursor = 0
                 self.trigger = 0
             #sleep(60./self.bpm - debut + time())
@@ -47,12 +47,21 @@ class pyOSCseq(object):
 
     @_liblo.make_method('/Sequencer/Set_bpm', 'i')
     def set_bpm(self, path, args):
-        print args[0]
+        #print "bpm: " + str(args[0]) + " / " + str(time())
         self.bpm = args[0]
         
     @_liblo.make_method('/Sequencer/Sequence/Enable', 'si')
     def enable_sequence(self,path,args):
         self.sequences[args[0]].enable(args[1])
+
+    @_liblo.make_method('/Sequencer/DisableAll', 'i')
+    def disable_all(self, path, args):
+        for s in self.sequences:
+            self.sequences[s].enable(0)
+        for s in self.scenes:
+            print s
+            self.scenes[s].kill()
+        self.scenes = {}
     
     @_liblo.make_method('/Sequencer/Scene/Play', 's')
     def play_scene(self,path,args):
