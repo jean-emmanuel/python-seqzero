@@ -207,11 +207,11 @@ l_seq.addSequence('AI Pont Guitare',[
     [['/CC/Green/Segment/All', 0],['/CC/White/Segment/All', 255], ['/CJ/White/Segment/All', 255]],
     [['/CC/White/Segment/All', 0], ['/CJ/White/Segment/All', 0]],
     [['/CC/White/Segment/All', 255], ['/CJ/White/Segment/All', 255]],
-    [['/CC/White/Segment/All', 0], ['/CJ/White/Segment/All', 0], [':/Sequencer/DisableAll',1], [':/Sequencer/Sequence/Enable','AI Mathomag 2',1]],  
+    [['/CC/White/Segment/All', 0], ['/CJ/White/Segment/All', 0], [':/Sequencer/DisableAll',1], [':/Sequencer/Sequence/Enable','AI Mathomag 1',1]],  
 ])
 
 
-l_seq.addSequence('AI Mathomag 2',[
+l_seq.addSequence('AI Mathomag 1',[
     [],
 
     [],
