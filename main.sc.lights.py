@@ -3,7 +3,7 @@ from scenessc import l_scenes_list
 
 #l_seq = pyOSCseq(440,12345,'127.0.0.1:7777',l_scenes_list)
 
-l_seq = pyOSCseq(440,12345,'192.168.0.13:7770',l_scenes_list)
+l_seq = pyOSCseq(440,12345,'192.168.0.12:7770',l_scenes_list)
 
 ################# Acte 0 ##############################
 
