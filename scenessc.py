@@ -13,6 +13,7 @@ position_x = slide+'position_x'
 position_y = slide+'position_y'
 translate_x = slide+'translate_x'
 load =  slide+'load_state'
+pv_animate = slide+'animate'
 
 """
 Animate function for pyOSCseq's osc sending method :
@@ -91,7 +92,52 @@ def v_scenes_list(send, name):
         sleep(1.8)
         
         animate(0,1,.3,.01,send,[alpha,7])
+
+    if name == 'Intro_alterno':
+        #Generique
+
+        for i in [0,1,2,3,4,5,6,7]:
+            send([visible,i,1])
+            send([pv_animate,i,-1000,1000,.5,.02,'position_x'])
+#        animate(-1000,0,.2,.02,send,[position_x,0])
         
+#        sleep(1)
+        
+#        for i in [1,2,3,5]:
+#            repeat(100,.015,send,[translate_x,i,-8.4])
+#        
+#        sleep(0.15)
+#
+#        
+#        animate(100,200,.1,.02,send,[position_y,0])
+#
+#        sleep(1)
+        
+
+        
+#        for i in [2,3]:
+#            repeat(120,.015,send,[translate_x,i,-1])
+        
+#        sleep(1.8)
+        
+#        animate(0,1,.3,.01,send,[alpha,7])
+
+    if name == 'CoffeeNoise':
+        # Coffee Noise
+        for i in [0, 1, 2, 3]:
+            send([visible, i-1, 0])
+            send([visible, i, 1])
+            sleep(0.1)
+
+    if name == 'AI - Guitare seule':
+        #Intro Guitare
+#        repeat(115, .5, send, [':/Sequencer/Scene/Play CoffeeNoise'])
+        send([':/Sequencer/Trigger', 1])                                                                                              
+        send([':/Sequencer/Set_bpm', 600])                                                                                            
+        send([':/Sequencer/Sequence/Enable', 'CoffeeNoise', 1])                                                                          
+         
+
+
 
 # Lights
 def l_scenes_list(send, name):
