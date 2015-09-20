@@ -101,7 +101,6 @@ class pyOSCseq(object):
                     ir = random()*len(events)
             eventsr.append(events[int(ir)])
             oldir = int(ir)
-        print eventsr
         self.sequences[name] = self.sequence(self,name,eventsr)
         
     def addClip(self,name,events):
