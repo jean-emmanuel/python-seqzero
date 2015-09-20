@@ -100,6 +100,9 @@ def v_scenes_list(send, name):
             send([visible,i,1])
             send([pv_animate,i,-1000,1000,.5,.02,'position_x'])
 
+    if name == "LoadWhite":
+        send([load, 's99.white.state'])
+
     if name == 'LoadCoffeeNoise':
         for i in [80, 81, 82, 83]:
             send([load, 's'+str(i)+'.coffeenoise.state'])
