@@ -1,6 +1,7 @@
 from time import sleep , time
 import liblo as _liblo
 from kthread import KThread
+from random import random
 
        
 class pyOSCseq(object):
@@ -80,10 +81,28 @@ class pyOSCseq(object):
     @_liblo.make_method('/test', None)
     def test(self,path,args):
         print 'Test : ' + str(args)
-        
 
     def addSequence(self,name,events):
         self.sequences[name] = self.sequence(self,name,events)
+
+    def addRandomSequence(self,name,events,steps):
+        ''' This method adds a randomized sequence with NON-REPEATING steps'''
+        eventsr=[]
+        oldir=-1
+        for i in range(0, steps-1):
+            ir = random()*len(events)
+            if i == 0:
+                origin = int(ir) # detection du premier pas pour le bouclage de la boucle
+            if i < steps-1:
+                while int(ir) == oldir:
+                    ir = random()*len(events)
+            else:
+                while int(ir) == oldir or int(ir) == origin:
+                    ir = random()*len(events)
+            eventsr.append(events[int(ir)])
+            oldir = int(ir)
+        print eventsr
+        self.sequences[name] = self.sequence(self,name,eventsr)
         
     def addClip(self,name,events):
         self.clips[name] = self.clip(self,name,events)

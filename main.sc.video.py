@@ -7,12 +7,27 @@ v_seq = pyOSCseq(110, 12346, 'localhost:5556 192.168.0.112:56418 192.168.0.112:5
 ################# GENERIQUES ##########################
 
 # CoffeeNoise
+#v_seq.addSequence('CoffeeNoise', [
+#    [['/pyta/slide/visible', 80, 1], ['/pyta/slide/visible', 83, 0]],
+#    [['/pyta/slide/visible', 81, 1], ['/pyta/slide/visible', 80, 0]],
+#    [['/pyta/slide/visible', 82, 1], ['/pyta/slide/visible', 81, 0]],
+#    [['/pyta/slide/visible', 83, 1], ['/pyta/slide/visible', 82, 0]],
+#])
+
+v_seq.addRandomSequence('CoffeeNoise', [
+    [['/pyta/slide/visible', 80, 1]],
+    [['/pyta/slide/visible', 81, 1]],
+    [['/pyta/slide/visible', 82, 1]],
+    [['/pyta/slide/visible', 83, 1]],
+], 14)
+
 v_seq.addSequence('CoffeeNoise', [
-    [['/pyta/slide/visible', 80, 1], ['/pyta/slide/visible', 83, 0]],
-    [['/pyta/slide/visible', 81, 1], ['/pyta/slide/visible', 80, 0]],
-    [['/pyta/slide/visible', 82, 1], ['/pyta/slide/visible', 81, 0]],
-    [['/pyta/slide/visible', 83, 1], ['/pyta/slide/visible', 82, 0]],
-])
+    [['/pyta/slide/visible', 80, 1], ['/pyta/slide/visible', 81, 0], ['/pyta/slide/visible', 82, 0], ['/pyta/slide/visible', 83, 0]],
+    [['/pyta/slide/visible', 81, 1], ['/pyta/slide/visible', 80, 0], ['/pyta/slide/visible', 82, 0], ['/pyta/slide/visible', 83, 0]],
+    [['/pyta/slide/visible', 82, 1], ['/pyta/slide/visible', 80, 0], ['/pyta/slide/visible', 81, 0], ['/pyta/slide/visible', 83, 0]],
+    [['/pyta/slide/visible', 83, 1], ['/pyta/slide/visible', 80, 0], ['/pyta/slide/visible', 81, 0], ['/pyta/slide/visible', 82, 0]],
+]) #, 14)
+
 
 
 ################# Acte I ##############################
