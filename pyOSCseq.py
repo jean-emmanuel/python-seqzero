@@ -80,7 +80,8 @@ class pyOSCseq(object):
     @_liblo.make_method('/test', None)
     def test(self,path,args):
         print 'Test : ' + str(args)
-            
+        
+
     def addSequence(self,name,events):
         self.sequences[name] = self.sequence(self,name,events)
         

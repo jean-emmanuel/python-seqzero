@@ -99,28 +99,10 @@ def v_scenes_list(send, name):
         for i in [0,1,2,3,4,5,6,7]:
             send([visible,i,1])
             send([pv_animate,i,-1000,1000,.5,.02,'position_x'])
-#        animate(-1000,0,.2,.02,send,[position_x,0])
-        
-#        sleep(1)
-        
-#        for i in [1,2,3,5]:
-#            repeat(100,.015,send,[translate_x,i,-8.4])
-#        
-#        sleep(0.15)
-#
-#        
-#        animate(100,200,.1,.02,send,[position_y,0])
-#
-#        sleep(1)
-        
 
-        
-#        for i in [2,3]:
-#            repeat(120,.015,send,[translate_x,i,-1])
-        
-#        sleep(1.8)
-        
-#        animate(0,1,.3,.01,send,[alpha,7])
+    if name == 'LoadCoffeeNoise':
+        for i in [80, 81, 82, 83]:
+            send([load, 's'+str(i)+'.coffeenoise.state'])
 
     if name == 'CoffeeNoise':
         # Coffee Noise
