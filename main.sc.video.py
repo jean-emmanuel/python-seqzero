@@ -41,7 +41,47 @@ v_seq.addRandomSequence('A0 Refrain Alpha', [
 ],45)
 
 
-# Intro
+# Say Hello
+
+v_seq.addSequence('A0 Say Hello', [
+    ['/pyta/slide/visible', 79, 1],
+    [],
+])
+
+v_seq.addSequence('A0 Say Hello Alpha', [
+    ['/pyta/slide/alpha', 79, 1],
+    ['/pyta/slide/alpha', 79, 0],
+    ['/pyta/slide/alpha', 79, 0.3], 
+    ['/pyta/slide/alpha', 79, 0],
+    ['/pyta/slide/alpha', 79, 0.3], # VP Jardin alpha a 1
+    ['/pyta/slide/alpha', 79, 0],
+    ['/pyta/slide/alpha', 79, 0.3],
+    ['/pyta/slide/alpha', 79, 0],
+    ['/pyta/slide/alpha', 79, 0.3], # VP Jardin alpha a 1
+    ['/pyta/slide/alpha', 79, 0],
+    ['/pyta/slide/alpha', 79, 0.3],
+    ['/pyta/slide/alpha', 79, 0],
+    ['/pyta/slide/alpha', 79, 0.3],
+    ['/pyta/slide/alpha', 79, 0],
+    ['/pyta/slide/alpha', 79, 1],
+    ['/pyta/slide/alpha', 79, 0],
+    ['/pyta/slide/alpha', 79, 0.3],
+    ['/pyta/slide/alpha', 79, 0],
+    ['/pyta/slide/alpha', 79, 0.3],
+    ['/pyta/slide/alpha', 79, 0],
+    ['/pyta/slide/alpha', 79, 0.3],
+    ['/pyta/slide/alpha', 79, 0],
+    ['/pyta/slide/alpha', 79, 1],
+    ['/pyta/slide/alpha', 79, 0],
+    ['/pyta/slide/alpha', 79, 0.3],
+    ['/pyta/slide/alpha', 79, 0],
+    ['/pyta/slide/alpha', 79, 0.3],
+    ['/pyta/slide/alpha', 79, 0],
+    ['/pyta/slide/alpha', 79, 0.3], # VP Cour alpha a 1
+    ['/pyta/slide/alpha', 79, 0],
+    ['/pyta/slide/alpha', 79, 0.3], # VP Jardin alpha a 1
+    ['/pyta/slide/alpha', 79, 0],
+])
 
 
 v_seq.play()

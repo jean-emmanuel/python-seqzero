@@ -64,41 +64,6 @@ def v_scenes_list(send, name):
         suffix = '.generique.state'
         send([[load,'s0.featuring'+suffix],[load,'s1.jaquie.body'+suffix],[load,'s2.michel.body'+suffix],[load,'s3.michel.head'+suffix],[load,'s5.jaquie.head'+suffix],[load,'s7.the.nots.awful.geminos'+suffix]])
          
-    if name == 'Intro_generique':
-        #Generique
-
-        for i in [0,1,2,3,5,7]:
-            send([visible,i,1])
-
-        animate(-1000,0,.2,.02,send,[position_x,0])
-        
-        sleep(1)
-        
-        for i in [1,2,3,5]:
-            repeat(100,.015,send,[translate_x,i,-8.4])
-        
-        sleep(0.15)
-
-        
-        animate(100,200,.1,.02,send,[position_y,0])
-
-        sleep(1)
-        
-
-        
-        for i in [2,3]:
-            repeat(120,.015,send,[translate_x,i,-1])
-        
-        sleep(1.8)
-        
-        animate(0,1,.3,.01,send,[alpha,7])
-
-    if name == 'Intro_alterno':
-        #Generique
-
-        for i in [0,1,2,3,4,5,6,7]:
-            send([visible,i,1])
-            send([pv_animate,i,-1000,1000,.5,.02,'position_x'])
 
     if name == "LoadWhite":
         send([load, 's99.white.state'])
@@ -107,21 +72,12 @@ def v_scenes_list(send, name):
         for i in [80, 81, 82, 83, 84, 85, 86, 87, 88, 89]:
             send([load, 's'+str(i)+'.coffeenoise.state'])
 
-    if name == 'CoffeeNoise':
-        # Coffee Noise
-        for i in [0, 1, 2, 3]:
-            send([visible, i-1, 0])
-            send([visible, i, 1])
-            sleep(0.1)
 
-    if name == 'AI - Guitare seule':
-        #Intro Guitare
-#        repeat(115, .5, send, [':/Sequencer/Scene/Play CoffeeNoise'])
-        send([':/Sequencer/Trigger', 1])                                                                                              
-        send([':/Sequencer/Set_bpm', 600])                                                                                            
-        send([':/Sequencer/Sequence/Enable', 'CoffeeNoise', 1])                                                                          
-         
-
+    # Acte 0 ##############################
+    # Say Hello
+    if name == "A0 Say Hello":
+            send([pv_animate,79,-700,0,120,.02,'position_y'])
+            send([pv_animate,99,0.9,0,120,.02,'alpha'])
 
 
 # Lights
