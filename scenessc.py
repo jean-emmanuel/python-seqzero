@@ -104,7 +104,7 @@ def v_scenes_list(send, name):
         send([load, 's99.white.state'])
 
     if name == 'LoadCoffeeNoise':
-        for i in [80, 81, 82, 83]:
+        for i in [80, 81, 82, 83, 84, 85, 86, 87, 88, 89]:
             send([load, 's'+str(i)+'.coffeenoise.state'])
 
     if name == 'CoffeeNoise':
