@@ -3,7 +3,7 @@ import liblo as _liblo
 from random import random
 from multiprocessing import *
 from os import urandom, kill
-from signal import SIGTERM
+from signal import SIGKILL
 
 
 class pyOSCseq(object):
@@ -80,7 +80,7 @@ class pyOSCseq(object):
         if self.scenes[args[0]].pid in self.scenes_subprocesses:
             pids = self.scenes_subprocesses[self.scenes[args[0]].pid]
             for pid in pids:
-                kill(pid, SIGTERM)
+                kill(pid, SIGKILL)
             del self.scenes_subprocesses[self.scenes[args[0]].pid]
 
         self.scenes[args[0]].terminate()
