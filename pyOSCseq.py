@@ -2,7 +2,7 @@ from time import sleep , time
 import liblo as _liblo
 from random import random
 from multiprocessing import *
-from os import urandom, kill
+from os import kill
 from signal import SIGKILL
 
 
