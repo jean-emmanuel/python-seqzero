@@ -84,4 +84,147 @@ v_seq.addSequence('A0 Say Hello Alpha', [
 ])
 
 
+################# Acte 1 ##############################
+# Gals
+v_seq.addRandomSequence('A1 Gals Grouille', [
+    ['/pyta/slide/scale', 79, 805, 800, 0],
+    ['/pyta/slide/scale', 79, 800, 800, 0],
+    ['/pyta/slide/scale', 79, 800, 805, 0],
+    ['/pyta/slide/scale', 79, 800, 800, 0],
+], 128)
+
+# Strange World sortie Reggae
+v_seq.addSequence('A1 StrangeWorld Sortie Reggae', [
+    ['/pyta/slide/rotate_z', 79, 0],
+    ['/pyta/slide/rotate_z', 79, 90],
+    ['/pyta/slide/rotate_z', 79, 180],
+    ['/pyta/slide/rotate_z', 79, 270]
+])
+
+# Liba Libanese
+v_seq.addSequence('A1 Liba Libanese', [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+
+    ['/pyta/slide/visible', 80, 1],
+    ['/pyta/slide/visible', 80, 0],
+    ['/pyta/slide/visible', 81, 1],
+    ['/pyta/slide/visible', 81, 0],
+
+    [],
+    [],
+    [],
+    [],
+
+    [],
+    ['/pyta/slide/visible', 82, 1],
+    [['/pyta/slide/visible', 83, 1],['/pyta/slide/visible', 82, 0]],
+    [['/pyta/slide/visible', 82, 0],['/pyta/slide/visible', 83, 0]],
+
+
+    [],
+    ['/pyta/slide/visible', 84, 1],
+    [['/pyta/slide/visible', 85, 1],['/pyta/slide/visible', 84, 0]],
+    [['/pyta/slide/visible', 84, 0],['/pyta/slide/visible', 85, 0]],
+
+    [],
+    [],
+
+    ['/pyta/slide/visible', 85, 1],
+    ['/pyta/slide/visible', 85, 0],
+
+    ['/pyta/slide/visible', 86, 1],
+    ['/pyta/slide/visible', 86, 0],
+
+    [],
+    [],
+
+    [],
+    ['/pyta/slide/visible', 87, 1],
+    [['/pyta/slide/visible', 88, 1],['/pyta/slide/visible', 87, 0]],
+    [['/pyta/slide/visible', 87, 0],['/pyta/slide/visible', 88, 0]],
+
+
+    [],
+    ['/pyta/slide/visible', 89, 1],
+    [['/pyta/slide/visible', 80, 1],['/pyta/slide/visible', 89, 0]],
+    [['/pyta/slide/visible', 89, 0],['/pyta/slide/visible', 80, 0]],
+
+    [],
+    [],
+    ['/pyta/slide/visible', 85, 1],
+    ['/pyta/slide/visible', 85, 0],
+
+    [],
+    [],
+    [],
+    [],
+
+    [],
+    ['/pyta/slide/visible', 82, 1],
+    [['/pyta/slide/visible', 83, 1],['/pyta/slide/visible', 82, 0]],
+    [['/pyta/slide/visible', 82, 0],['/pyta/slide/visible', 83, 0]],
+
+
+    [],
+    ['/pyta/slide/visible', 84, 1],
+    [['/pyta/slide/visible', 85, 1],['/pyta/slide/visible', 84, 0]],
+    [['/pyta/slide/visible', 84, 0],['/pyta/slide/visible', 85, 0]],
+
+    [],
+    [],
+    ['/pyta/slide/visible', 86, 1],
+    ['/pyta/slide/visible', 86, 0],
+
+    ['/pyta/slide/visible', 87, 1],
+    ['/pyta/slide/visible', 87, 0],
+    [],
+    [],
+
+    [],
+    ['/pyta/slide/visible', 88, 1],
+    ['/pyta/slide/visible', 89, 1],
+    [['/pyta/slide/visible', 88, 0],['/pyta/slide/visible', 89, 0]],
+
+    ['/pyta/slide/visible', 80, 1],
+    [['/pyta/slide/visible', 81, 1], ['/pyta/slide/visible', 80, 0]],
+    [['/pyta/slide/visible', 82, 1], ['/pyta/slide/visible', 81, 0]],
+    [['/pyta/slide/visible', 82, 0]],
+
+    ['/pyta/slide/visible', 83, 1],
+    [['/pyta/slide/visible', 84, 1], ['/pyta/slide/visible', 83, 0]],
+    [['/pyta/slide/visible', 85, 1], ['/pyta/slide/visible', 84, 0]],
+    [['/pyta/slide/visible', 85, 0], [':/Sequencer/DisableAll',1], [':/Sequencer/Sequence/Enable','AI Mathomag 1',1]], 
+])
+
 v_seq.play()
