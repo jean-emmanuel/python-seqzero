@@ -224,7 +224,7 @@ v_seq.addSequence('A1 Liba Libanese', [
     ['/pyta/slide/visible', 83, 1],
     [['/pyta/slide/visible', 84, 1], ['/pyta/slide/visible', 83, 0]],
     [['/pyta/slide/visible', 85, 1], ['/pyta/slide/visible', 84, 0]],
-    [['/pyta/slide/visible', 85, 0], [':/Sequencer/DisableAll',1], [':/Sequencer/Sequence/Enable','AI Mathomag 1',1]], 
+    [['/pyta/slide/visible', 85, 0], [':/Sequencer/DisableAll',1], ['/pyta/slide/visible', -1, 0]]#[':/Sequencer/Sequence/Enable','AI Mathomag 1',1]], 
 ])
 
 v_seq.play()
