@@ -3,8 +3,6 @@ OSC Scenes for pyOSCseq
 """
 
 from time import sleep, time
-from liblo import send
-from threading import Thread
 
 slide = '/pyta/slide/'
 visible = slide+'visible'
@@ -15,41 +13,7 @@ translate_x = slide+'translate_x'
 load =  slide+'load_state'
 pv_animate = slide+'animate'
 
-"""
-Animate function for pyOSCseq's osc sending method :
-Execute the given function for different values of its last argument,
-computed between 'start' and 'end'.
-- duration (s) : time to complete the animation
-- step (s) : delay between each step
-- function : function to animate, most likely 'send' (which is an alias for pyOSCseq.parseOscArgs()
-- args : tuple containing the first arguments passed to the function (these won't be animated)
-"""
-def animate(start,end,duration,step,function,args, mode='float'):
-    def threaded(start,end,duration,step,function,args, mode):
-        nb_step = int(round(duration/step))
-        a = float(end-start)/nb_step
-        args.append(0)
-        for i in range(nb_step+1):
-            args[-1] = a*i+start
-            if mode == 'integer':
-                args[-1] = int(args[-1])
-            function([args])
-            if i!=nb_step:
-                sleep(step)
-    t = Thread(target=threaded, args=([start,end,duration,step,function,args, mode]))
-    t.start()
 
-"""
-Repeat function for pyOSCseq's osc sending method :
-Execute the given function nb_repeat times, and waits interval seconds between each call
-"""
-def repeat(nb_repeat,interval,function,args):
-    def threaded(nb_repeat,interval,function,args):
-        for i in range(nb_repeat):
-            function([args])
-            sleep(interval)
-    t = Thread(target=threaded, args=([nb_repeat,interval,function,args]))
-    t.start()
 
 """
 Scenes list
@@ -58,12 +22,17 @@ The 'send' argument retrieves pyOSCseq osc sending function to dispatch the mess
 """
 
 # Videos
-def v_scenes_list(send, name):
+def v_scenes_list(sequencer, name):
+    send = sequencer.parseOscArgs
+    animate = sequencer.animate
+    repeat = sequencer.repeat
+
+
     if name == 'Intro_init':
         #Loading slides
         suffix = '.generique.state'
         send([[load,'s0.featuring'+suffix],[load,'s1.jaquie.body'+suffix],[load,'s2.michel.body'+suffix],[load,'s3.michel.head'+suffix],[load,'s5.jaquie.head'+suffix],[load,'s7.the.nots.awful.geminos'+suffix]])
-         
+
 
     if name == "LoadWhite":
         send([load, 's99.white.state'])
@@ -81,7 +50,10 @@ def v_scenes_list(send, name):
 
 
 # Lights
-def l_scenes_list(send, name):
+def l_scenes_list(sequencer, name):
+    send = sequencer.parseOscArgs
+    animate = sequencer.animate
+    repeat = sequencer.repeat
     # Acte I ##############################
     # Intro
     if name == 'Intro':
@@ -108,11 +80,11 @@ def l_scenes_list(send, name):
     # Entree des Geminos
     if name == 'Entree Geminos':
         send(['/CJ/Red/Segment/1', 100])
-        send(['/CC/Red/Segment/1', 100])        
+        send(['/CC/Red/Segment/1', 100])
         send(['/CJ/Blue/Segment/1', 100])
-        send(['/CC/Blue/Segment/1', 100])        
+        send(['/CC/Blue/Segment/1', 100])
         send(['/CJ/Red/Segment/8', 100])
-        send(['/CC/Red/Segment/8', 100])        
+        send(['/CC/Red/Segment/8', 100])
         send(['/CJ/Blue/Segment/8', 100])
         send(['/CC/Blue/Segment/8', 100])
 
@@ -195,16 +167,24 @@ def l_scenes_list(send, name):
 		send(['/Decoupes/Jeannot/Dimmer', 255])
 
 # Audio
-def a_scenes_list(send, name):
+def a_scenes_list(sequencer, name):
+    send = sequencer.parseOscArgs
+    animate = sequencer.animate
+    repeat = sequencer.repeat
+
     if name == 'Intro':
         send(['/Sequencer/Intro', 127])
         #send(['/pedalBoard/button', 4])
 
         sleep(22.909)
-        send(['/pedalBoard/button', 2])        
+        send(['/pedalBoard/button', 2])
 
 # Main
-def m_scenes_list(send, name):
+def m_scenes_list(sequencer, name):
+    send = sequencer.parseOscArgs
+    animate = sequencer.animate
+    repeat = sequencer.repeat
+
     if name == "Debut":
         send(['/Sequencer/Play'])
         send(['/Sequencer/Scene/Play', 'Intro'])
