@@ -1,7 +1,7 @@
 from pyOSCseq import *
 from scenessc import v_scenes_list
 
-v_seq = pyOSCseq(110, 12346, 'localhost:5556 192.168.0.112:56418 192.168.0.112:56417', v_scenes_list)
+v_seq = pyOSCseq(110, 12346, 'localhost:5556 192.168.0.112:56418 192.168.0.112:56417 192.168.0.110:56418', v_scenes_list)
 
 
 ################# GENERIQUES ##########################
@@ -226,5 +226,25 @@ v_seq.addSequence('A1 Liba Libanese', [
     [['/pyta/slide/visible', 85, 1], ['/pyta/slide/visible', 84, 0]],
     [['/pyta/slide/visible', 85, 0], [':/Sequencer/DisableAll',1], ['/pyta/slide/visible', -1, 0]]#[':/Sequencer/Sequence/Enable','AI Mathomag 1',1]], 
 ])
+
+
+################# Acte 2 ##############################
+
+# Had Gadya 1
+v_seq.addRandomSequence('A2 Had Gadya Grouille', [
+        ['/pyta/slide/rotate_z', 70, 90],
+        ['/pyta/slide/rotate_z', 70, 180],
+        ['/pyta/slide/rotate_z', 70, 270],
+        ['/pyta/slide/rotate_z', 70, 0],
+], 67)
+
+v_seq.addRandomSequence('A2 Had Gadya Grouille Bis', [
+        ['/pyta/slide/translate_x', 70, 2],
+        ['/pyta/slide/translate_x', 70, -2],
+        ['/pyta/slide/translate_y', 70, 2],
+        ['/pyta/slide/translate_y', 70, -2],
+], 67)
+
+
 
 v_seq.play()
