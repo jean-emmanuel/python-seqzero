@@ -42,11 +42,36 @@ def v_scenes_list(sequencer, name):
             send([load, 's'+str(i)+'.coffeenoise.state'])
 
 
+
     # Acte 0 ##############################
     # Say Hello
     if name == "A0 Say Hello":
             send([pv_animate,79,-700,0,120,.02,'position_y'])
             send([pv_animate,99,0.9,0,120,.02,'alpha'])
+
+
+    # Acte 2 ##############################
+    # Had Gadya 2
+    if name == 'AII HG2':
+        sleep(.2)
+        sleep(12.4)
+        sleep(1.2)
+        send(['/pyta/slide/rgb', 70, 0, 0, 1])
+        send(['/pyta/slide/visible', 70, 1])
+    	sleep(0.2)
+        send(['/pyta/slide/visible', 70, 0])
+        send(['/pyta/slide/rgb', 70, 1, 1, 1])
+        sleep(0.2)
+    	sleep(0.2)
+
+        send([':/Sequencer/Trigger', 1])
+        send([':/Sequencer/Set_bpm', 480])
+        send(['/pyta/slide/visible', 99, 1])
+        send(['/pyta/slide/alpha', 99, 0.85])
+        send(['/pyta/slide/visible', 70, 1])
+        send(['/pyta/slide/alpha', 70, 0.6])
+        send([':/Sequencer/Sequence/Enable', 'A2 Had Gadya Grouille', 1])
+        send([':/Sequencer/Sequence/Enable', 'A2 Had Gadya Grouille Bis', 1])
 
 
 # Lights

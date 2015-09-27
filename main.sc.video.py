@@ -245,6 +245,10 @@ v_seq.addRandomSequence('A2 Had Gadya Grouille Bis', [
         ['/pyta/slide/translate_y', 70, -2],
 ], 67)
 
+# Had Gadya 2
+
+
+
 
 
 v_seq.play()
