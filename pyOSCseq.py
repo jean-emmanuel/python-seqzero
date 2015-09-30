@@ -69,7 +69,7 @@ class pyOSCseq(object):
     def play_scene(self,path,args):
         if args[0] in self.scenes:
             self.stop_scene(False,[args[0]])
-            self.scenes[args[0]]
+            del self.scenes[args[0]]
 
         self.scenes[args[0]] = Process(target=self.scenes_list,args=[self,args[0]])
         self.scenes[args[0]].start()
@@ -80,7 +80,10 @@ class pyOSCseq(object):
         if self.scenes[args[0]].pid in self.scenes_subprocesses:
             pids = self.scenes_subprocesses[self.scenes[args[0]].pid]
             for pid in pids:
-                kill(pid, SIGKILL)
+                try:
+                    kill(pid, SIGKILL)
+                except:
+                    pass
             del self.scenes_subprocesses[self.scenes[args[0]].pid]
 
         self.scenes[args[0]].terminate()
@@ -165,9 +168,9 @@ class pyOSCseq(object):
 
         parentPid = current_process().pid
 
-        # we need need to do this trick
+        # we need (need) to do this trick
         # using a proxy variable before modifying self.scenes_subprocesses
-        # ensures the Manager see the change and sync the object accross processe
+        # ensures that the Manager sees the change and sync the object accross processes
 
         proxy = []
         if parentPid in self.scenes_subprocesses:
