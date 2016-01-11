@@ -34,7 +34,7 @@ class pyOSCseq(object):
                 self.parseOscArgs(self.sequences[name].getArgs(self.cursor))
             self.cursor += 1
             while time() - debut < 60./self.bpm and self.trigger == 0:
-                pass
+                sleep(0.0001)
             if self.trigger == 1:
                 self.cursor = 0
                 self.trigger = 0
