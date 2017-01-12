@@ -27,24 +27,35 @@ class Sequencer(object):
         self.server.register_methods(self)
         self.server.start()
 
+    def start(self):
+
+        while True:
+
+            if self.is_playing:
+                debut = time()
+                for name in self.sequences:
+                    self.playStep(self.sequences[name].getStep(self.cursor))
+                self.cursor += 1
+                while time() - debut < 60./self.bpm and self.trigger == 0:
+                    sleep(0.0001)
+                if self.trigger == 1:
+                    self.cursor = 0
+                    self.trigger = 0
+
+            else:
+                sleep(0.0001)
+
+
+
     @liblo.make_method('/Sequencer/Play', None)
     def play(self):
 
         if (self.is_playing):
-             return
+             return self.trig()
 
         self.is_playing = 1
         self.cursor = 0
-        while self.is_playing:
-            debut = time()
-            for name in self.sequences:
-                self.send(self.sequences[name].getArgs(self.cursor))
-            self.cursor += 1
-            while time() - debut < 60./self.bpm and self.trigger == 0:
-                sleep(0.0001)
-            if self.trigger == 1:
-                self.cursor = 0
-                self.trigger = 0
+
 
     @liblo.make_method('/Sequencer/Stop', None)
     def stop(self):
@@ -59,6 +70,7 @@ class Sequencer(object):
 
     @liblo.make_method('/Sequencer/Bpm', 'i')
     def set_bpm(self, path, args):
+        print args
 
         self.bpm = args[0]
 
@@ -92,8 +104,9 @@ class Sequencer(object):
             self.stop_scene(False,[args[0]])
             del self.scenes[args[0]]
 
-        self.scenes[args[0]] = Process(target=self.scenes_list,args=[self,args[0]])
-        self.scenes[args[0]].start()
+        if hasattr(self.scenes_list, args[0]):
+            self.scenes[args[0]] = Process(target=self.scenes_list.__dict__[args[0]],args=[self])
+            self.scenes[args[0]].start()
 
 
     @liblo.make_method('/Sequencer/Scene/Stop', 's')
@@ -143,19 +156,18 @@ class Sequencer(object):
 
         self.clips[name] = self.clip(self,name,events)
 
-    def send(self,args):
+    def playStep(self,args):
 
         if not args:
             return
 
         if type(args[0]) is list:
             for i in range(len(args)):
-                self.sendOsc(args[i])
+                self.send(*args[i])
         else:
-            self.sendOsc(args)
+            self.send(*args)
 
-    def sendOsc(self,args):
-
+    def send(self,*args):
         path = str(args[0])
         if path[0]== ':':
             self.server.send('osc.udp://localhost:'+str(self.port), path[1:], *args[1:])
@@ -184,62 +196,74 @@ class Sequencer(object):
 
 
 
-    def animate(self,start,end,duration,step,function,args, mode='float'):
+    def animate(self, args, start, end, duration, framelength=0, mode='float'):
         """
         Animate function for pyOSCseq's osc sending method :
         Execute the given function for different values of its last argument,
         computed between 'start' and 'end'.
+        - args : osc path string or tuple containing the first arguments passed to the function (these won't be animated)
         - duration (s) : time to complete the animation
-        - step (s) : delay between each step
-        - function : function to animate, most likely 'send' (which is an alias for pyOSCseq.send()
-        - args : tuple containing the first arguments passed to the function (these won't be animated)
+        - framelength (s) : delay between each step
         """
-        def threaded(start,end,duration,step,function,args, mode):
-
-            nb_step = int(round(duration/step))
+        def threaded(args, start, end, duration, framelength, mode):
+            args = [args] if type(args) != list else args
+            framelength = duration / 10. if framelength == 0 else framelength
+            nb_step = int(round(1.0*duration/framelength))
             a = float(end-start)/nb_step
             args.append(0)
             for i in range(nb_step+1):
                 args[-1] = a*i+start
                 if mode == 'integer':
                     args[-1] = int(args[-1])
-                function([args])
+                self.send(args)
                 if i!=nb_step:
-                    sleep(step)
+                    sleep(framelength)
 
-        self.registerSceneSubprocess(threaded,[start,end,duration,step,function,args, mode])
+        self.registerSceneSubprocess(threaded,[args, start, end, duration, framelength, mode])
 
 
 
-    def repeat(self,nb_repeat,interval,function,args):
+    def repeat(self, args, nb_repeat, interval):
         """
         Repeat function for pyOSCseq's osc sending method :
         Execute the given function nb_repeat times, and waits interval seconds between each call
         """
-        def threaded(nb_repeat,interval,function,args):
+        def threaded(args, nb_repeat, interval):
 
             for i in range(nb_repeat):
-                function([args])
+                self.send(args)
                 sleep(interval)
 
-        self.registerSceneSubprocess(threaded,[nb_repeat,interval,function,args])
+        self.registerSceneSubprocess(threaded,[args, nb_repeat, interval, function])
+
+    def beatsToSeconds(self, beats):
+        """Convert beats to seconds)"""
+        return 60./self.bpm * beats
+
+    def wait(self, beats):
+        """
+        Wait function: sleep function mapped to the sequencer's bpm
+        - beats: number of beats to wait
+        """
+        return sleep(self.beatsToSeconds(beats))
 
     class Sequence(object):
         """
         Sequence subclass : event loop synchronized by the sequencer's tempo
         """
-        def __init__(self,parent=None,name=None,events=None):
+        def __init__(self,parent=None,name=None,steps=None):
 
             self.name = name
-            self.events = events
-            self.beats = len(self.events)
+            self.steps = steps
+            self.beats = len(self.steps)
             self.is_playing = False
 
-        def getArgs(self,cursor):
+        def getStep(self,cursor):
 
             if not self.is_playing:
                 return False
-            return self.events[cursor%self.beats]
+
+            return self.steps[cursor%self.beats]
 
         def toggle(self,x):
 
