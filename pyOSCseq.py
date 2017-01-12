@@ -10,7 +10,7 @@ from signal import SIGKILL
 
 class Sequencer(object):
 
-    def __init__(self, bpm=120, port=12345, target=None, scenes_list=None):
+    def __init__(self, bpm=120, port=12345, target=None, scenes=None):
 
         self.bpm = bpm
         self.port = port
@@ -19,7 +19,7 @@ class Sequencer(object):
         self.is_playing = 0
         self.sequences = {}
         self.scenes = {}
-        self.scenes_list = scenes_list
+        self.scenes_list = scenes
         self.scenes_subprocesses = Manager().dict() # this will be shared accross processes
         self.trigger = 0
 
@@ -30,13 +30,15 @@ class Sequencer(object):
     @liblo.make_method('/Sequencer/Play', None)
     def play(self):
 
-        if (self.is_playing) return
+        if (self.is_playing):
+             return
+
         self.is_playing = 1
         self.cursor = 0
         while self.is_playing:
             debut = time()
             for name in self.sequences:
-                self.parseOscArgs(self.sequences[name].getArgs(self.cursor))
+                self.send(self.sequences[name].getArgs(self.cursor))
             self.cursor += 1
             while time() - debut < 60./self.bpm and self.trigger == 0:
                 sleep(0.0001)
@@ -141,7 +143,7 @@ class Sequencer(object):
 
         self.clips[name] = self.clip(self,name,events)
 
-    def parseOscArgs(self,args):
+    def send(self,args):
 
         if not args:
             return
@@ -189,7 +191,7 @@ class Sequencer(object):
         computed between 'start' and 'end'.
         - duration (s) : time to complete the animation
         - step (s) : delay between each step
-        - function : function to animate, most likely 'send' (which is an alias for pyOSCseq.parseOscArgs()
+        - function : function to animate, most likely 'send' (which is an alias for pyOSCseq.send()
         - args : tuple containing the first arguments passed to the function (these won't be animated)
         """
         def threaded(start,end,duration,step,function,args, mode):
