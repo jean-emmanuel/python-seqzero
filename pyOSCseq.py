@@ -1,16 +1,20 @@
+# encoding: utf-8
+
+import liblo
 from time import sleep , time
-import liblo as _liblo
 from random import random
 from multiprocessing import *
 from os import kill
 from signal import SIGKILL
 
 
-class pyOSCseq(object):
-    def __init__(self,bpm,port,target,scenes_list):
+class Sequencer(object):
+
+    def __init__(self, bpm=120, port=12345, target=None, scenes_list=None):
+
         self.bpm = bpm
         self.port = port
-        self.target = target.split(' ')
+        self.target = target.split(' ') if target is not None else []
         self.cursor = 0
         self.is_playing = 0
         self.sequences = {}
@@ -19,17 +23,18 @@ class pyOSCseq(object):
         self.scenes_subprocesses = Manager().dict() # this will be shared accross processes
         self.trigger = 0
 
-        self.server = _liblo.ServerThread(self.port)
+        self.server = liblo.ServerThread(self.port)
         self.server.register_methods(self)
         self.server.start()
 
-    @_liblo.make_method('/Sequencer/Play', 'f')
+    @liblo.make_method('/Sequencer/Play', None)
     def play(self):
+
+        if (self.is_playing) return
         self.is_playing = 1
         self.cursor = 0
         while self.is_playing:
             debut = time()
-            #print "c: " + str(self.cursor) + " / " + str(time())
             for name in self.sequences:
                 self.parseOscArgs(self.sequences[name].getArgs(self.cursor))
             self.cursor += 1
@@ -38,35 +43,49 @@ class pyOSCseq(object):
             if self.trigger == 1:
                 self.cursor = 0
                 self.trigger = 0
-            #sleep(60./self.bpm - debut + time())
 
-    @_liblo.make_method('/Sequencer/Stop', 'f')
+    @liblo.make_method('/Sequencer/Stop', None)
     def stop(self):
+
         self.is_playing = 0
 
-    @_liblo.make_method('/Sequencer/Trigger', 'i')
+    @liblo.make_method('/Sequencer/Trigger', None)
     def trig(self):
+
         self.trigger = 1
 
 
-    @_liblo.make_method('/Sequencer/Set_bpm', 'i')
+    @liblo.make_method('/Sequencer/Bpm', 'i')
     def set_bpm(self, path, args):
-        #print "bpm: " + str(args[0]) + " / " + str(time())
+
         self.bpm = args[0]
 
-    @_liblo.make_method('/Sequencer/Sequence/Enable', 'si')
-    def enable_sequence(self,path,args):
-        self.sequences[args[0]].enable(args[1])
+    @liblo.make_method('/Sequencer/Sequence/Toggle', 'si')
+    def toggle_sequence(self,path,args):
 
-    @_liblo.make_method('/Sequencer/DisableAll', 'i')
+        self.sequences[args[0]].toggle(args[1])
+
+    @liblo.make_method('/Sequencer/Sequence/Enable', 's')
+    def enable_sequence(self,path,args):
+
+        self.sequences[args[0]].toggle(1)
+
+    @liblo.make_method('/Sequencer/Sequence/Disable', 's')
+    def disable_sequence(self,path,args):
+
+        self.sequences[args[0]].toggle(0)
+
+    @liblo.make_method('/Sequencer/DisableAll', None)
     def disable_all(self, path, args):
+
         for s in self.sequences:
             self.sequences[s].enable(0)
         for s in self.scenes:
             self.stop_scene(False,[s])
 
-    @_liblo.make_method('/Sequencer/Scene/Play', 's')
+    @liblo.make_method('/Sequencer/Scene/Play', 's')
     def play_scene(self,path,args):
+
         if args[0] in self.scenes:
             self.stop_scene(False,[args[0]])
             del self.scenes[args[0]]
@@ -75,8 +94,9 @@ class pyOSCseq(object):
         self.scenes[args[0]].start()
 
 
-    @_liblo.make_method('/Sequencer/Scene/Stop', 's')
+    @liblo.make_method('/Sequencer/Scene/Stop', 's')
     def stop_scene(self,path,args):
+
         if self.scenes[args[0]].pid in self.scenes_subprocesses:
             pids = self.scenes_subprocesses[self.scenes[args[0]].pid]
             for pid in pids:
@@ -88,17 +108,19 @@ class pyOSCseq(object):
 
         self.scenes[args[0]].terminate()
         self.scenes[args[0]].join()
-        # del self.scenes[args[0]]
 
-    @_liblo.make_method('/test', None)
-    def test(self,path,args):
-        print 'Test : ' + str(args)
+    @liblo.make_method('/Sequencer/Debug', None)
+    def log(self,path,args):
+
+        print '[debug] Sequencer says: ' + str(args)
 
     def addSequence(self,name,events):
-        self.sequences[name] = self.sequence(self,name,events)
+
+        self.sequences[name] = self.Sequence(self,name,events)
 
     def addRandomSequence(self,name,events,steps):
         ''' This method adds a randomized sequence with NON-REPEATING steps'''
+
         eventsr=[]
         oldir=-1
         for i in range(0, steps-1):
@@ -116,6 +138,7 @@ class pyOSCseq(object):
         self.sequences[name] = self.sequence(self,name,eventsr)
 
     def addClip(self,name,events):
+
         self.clips[name] = self.clip(self,name,events)
 
     def parseOscArgs(self,args):
@@ -130,36 +153,14 @@ class pyOSCseq(object):
             self.sendOsc(args)
 
     def sendOsc(self,args):
+
         path = str(args[0])
         if path[0]== ':':
-            _liblo.send('osc.udp://localhost:'+str(self.port), path[1:], *args[1:])
+            self.server.send('osc.udp://localhost:'+str(self.port), path[1:], *args[1:])
 
         else:
             for i in range(len(self.target)):
-                _liblo.send('osc.udp://'+self.target[i], path, *args[1:])
-
-
-    """
-    Sequence subclass : event loop synchronized by the sequencer's tempo
-    """
-    class sequence(object):
-        def __init__(self,parent=None,name=None,events=None):
-            self.name = name
-            self.events = events
-            self.beats = len(self.events)
-            self.is_playing = False
-
-        def getArgs(self,cursor):
-            if not self.is_playing:
-                return False
-            return self.events[cursor%self.beats]
-
-        def enable(self,x):
-            self.is_playing = bool(x)
-
-
-
-
+                self.server.send('osc.udp://'+self.target[i], path, *args[1:])
 
     def registerSceneSubprocess(self,target,args):
 
@@ -181,18 +182,18 @@ class pyOSCseq(object):
 
 
 
-
-    """
-    Animate function for pyOSCseq's osc sending method :
-    Execute the given function for different values of its last argument,
-    computed between 'start' and 'end'.
-    - duration (s) : time to complete the animation
-    - step (s) : delay between each step
-    - function : function to animate, most likely 'send' (which is an alias for pyOSCseq.parseOscArgs()
-    - args : tuple containing the first arguments passed to the function (these won't be animated)
-    """
     def animate(self,start,end,duration,step,function,args, mode='float'):
+        """
+        Animate function for pyOSCseq's osc sending method :
+        Execute the given function for different values of its last argument,
+        computed between 'start' and 'end'.
+        - duration (s) : time to complete the animation
+        - step (s) : delay between each step
+        - function : function to animate, most likely 'send' (which is an alias for pyOSCseq.parseOscArgs()
+        - args : tuple containing the first arguments passed to the function (these won't be animated)
+        """
         def threaded(start,end,duration,step,function,args, mode):
+
             nb_step = int(round(duration/step))
             a = float(end-start)/nb_step
             args.append(0)
@@ -208,13 +209,36 @@ class pyOSCseq(object):
 
 
 
-    """
-    Repeat function for pyOSCseq's osc sending method :
-    Execute the given function nb_repeat times, and waits interval seconds between each call
-    """
     def repeat(self,nb_repeat,interval,function,args):
+        """
+        Repeat function for pyOSCseq's osc sending method :
+        Execute the given function nb_repeat times, and waits interval seconds between each call
+        """
         def threaded(nb_repeat,interval,function,args):
+
             for i in range(nb_repeat):
                 function([args])
                 sleep(interval)
+
         self.registerSceneSubprocess(threaded,[nb_repeat,interval,function,args])
+
+    class Sequence(object):
+        """
+        Sequence subclass : event loop synchronized by the sequencer's tempo
+        """
+        def __init__(self,parent=None,name=None,events=None):
+
+            self.name = name
+            self.events = events
+            self.beats = len(self.events)
+            self.is_playing = False
+
+        def getArgs(self,cursor):
+
+            if not self.is_playing:
+                return False
+            return self.events[cursor%self.beats]
+
+        def toggle(self,x):
+
+            self.is_playing = bool(x)

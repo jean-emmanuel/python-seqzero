@@ -5,8 +5,8 @@ import trace
 import threading
 
 class KThread(threading.Thread):
-  """A subclass of threading.Thread, with a kill()
-method."""
+  """A subclass of threading.Thread, with a kill() method."""
+
   def __init__(self, *args, **keywords):
     threading.Thread.__init__(self, *args, **keywords)
     self.killed = False
@@ -18,8 +18,7 @@ method."""
     threading.Thread.start(self)
 
   def __run(self):
-    """Hacked run function, which installs the
-trace."""
+    """Hacked run function, which installs the trace."""
     sys.settrace(self.globaltrace)
     self.__run_backup()
     self.run = self.__run_backup
