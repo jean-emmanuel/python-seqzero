@@ -231,15 +231,15 @@ class Sequencer(object):
         stepsR = []
         oldir = -1
         for i in range(0, n_steps - 1):
-            ir = random()*len(steps)
+            ir = random() * len(steps)
             if i == 0:
                 origin = int(ir) # detection du premier pas pour le bouclage de la boucle
             if i < n_steps - 1:
                 while int(ir) == oldir:
-                    ir = random()*len(steps)
+                    ir = random() * len(steps)
             else:
                 while int(ir) == oldir or int(ir) == origin:
-                    ir = random()*len(steps)
+                    ir = random() * len(steps)
             stepsR.append(steps[int(ir)])
             oldir = int(ir)
 
@@ -263,12 +263,12 @@ class Sequencer(object):
         Send osc messages
         """
 
-        if path[0]== ':':
-            self.server.send('osc.udp://localhost:'+str(self.port), path[1:], *args)
+        if path[0] == ':':
+            self.server.send('osc.udp://localhost:' + str(self.port), path[1:], *args)
 
         else:
             for i in range(len(self.target)):
-                self.server.send('osc.udp://'+self.target[i], path, *args)
+                self.server.send('osc.udp://' + self.target[i], path, *args)
 
     def registerSceneSubprocess(self, target, args):
         """
@@ -304,16 +304,16 @@ class Sequencer(object):
         def threaded(args, start, end, duration, framelength, mode):
             args = [args] if type(args) != list else args
             framelength = duration / 10. if framelength == 0 else framelength
-            nb_step = int(round(1.0*duration/framelength))
-            a = float(end-start)/nb_step
+            nb_step = int(round(1.0 * duration / framelength))
+            a = float(end - start) / nb_step
             args.append(0)
-            for i in range(nb_step+1):
+            for i in range(nb_step + 1):
                 begin = time()
-                args[-1] = a*i+start
+                args[-1] = a * i + start
                 if mode == 'integer':
                     args[-1] = int(args[-1])
                 self.send(*args)
-                if i!=nb_step:
+                if i != nb_step:
                     while time() - begin < framelength:
                         sleep(0.001)
 
@@ -336,7 +336,7 @@ class Sequencer(object):
 
     def beatsToSeconds(self, beats):
         """Convert beats to seconds)"""
-        return 60./self.bpm * beats
+        return 60. / self.bpm * beats
 
     def wait(self, beats):
         """
