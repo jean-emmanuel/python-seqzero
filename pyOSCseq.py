@@ -62,13 +62,13 @@ class Sequencer(object):
                     self.playStep(self.sequences[name].getStep(self.cursor))
                 self.cursor += 1
                 while time() - debut < 60./self.bpm and self.trigger == 0:
-                    sleep(0.0001)
+                    sleep(0.001)
                 if self.trigger == 1:
                     self.cursor = 0
                     self.trigger = 0
 
             else:
-                sleep(0.0001)
+                sleep(0.001)
 
         self.disable_all('','')
         self.server.stop()
