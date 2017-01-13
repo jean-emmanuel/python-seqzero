@@ -22,7 +22,10 @@ It is written in [python](https://www.youtube.com/watch?v=asUyK6JWt9U), you'll n
 ### `scenes`
 
 - are theaded `python` scripts that are executed outside the `sequencer` loop
+- they take `sequencer` object as argument and can access its methods, including some helper functions (ie to interpolate value, )
 - they are named
+- they are defined in a separated module file which is provided to the sequencer
+
 
 ## Requirements
 
