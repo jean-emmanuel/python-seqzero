@@ -218,10 +218,6 @@ class Sequencer(object):
 
         self.sequences[name] = self.sequence(self,name,stepsR)
 
-    def addClip(self,name,events):
-
-        self.clips[name] = self.clip(self,name,events)
-
     def playStep(self,args):
         """
         Parse a Sequence's step
@@ -269,7 +265,6 @@ class Sequencer(object):
         self.scenes_subprocesses[parentPid] = proxy
 
 
-
     def animate(self, args, start, end, duration, framelength=0, mode='float'):
         """
         Animate function for pyOSCseq's osc sending method :
@@ -294,8 +289,6 @@ class Sequencer(object):
                     sleep(framelength)
 
         self.registerSceneSubprocess(threaded,[args, start, end, duration, framelength, mode])
-
-
 
     def repeat(self, args, nb_repeat, interval):
         """
