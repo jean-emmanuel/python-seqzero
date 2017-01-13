@@ -25,7 +25,6 @@ send('osc.udp://localhost:12345', '/Sequencer/Sequence/Enable', 'test')
 # Start the sequencer
 send('osc.udp://localhost:12345', '/Sequencer/Play')
 
-# keep the script running
-raw_input('OSC Sequencer: press enter to quit...')
+seq.start()
 
 # now listen on port 5555 with your favorite tool...

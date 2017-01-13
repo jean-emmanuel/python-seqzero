@@ -5,8 +5,7 @@ from time import sleep , time
 from random import random
 from multiprocessing import *
 from os import kill
-from signal import SIGKILL
-
+import signal
 
 class Sequencer(object):
 
@@ -27,9 +26,15 @@ class Sequencer(object):
         self.server.register_methods(self)
         self.server.start()
 
+        self.exiting = False
+        signal.signal(signal.SIGINT, self.exit)
+        signal.signal(signal.SIGTERM, self.exit)
+
     def start(self):
 
-        while True:
+        print 'OSC Sequencer: started'
+
+        while not self.exiting:
 
             if self.is_playing:
                 debut = time()
@@ -45,7 +50,14 @@ class Sequencer(object):
             else:
                 sleep(0.0001)
 
+        self.disable_all('','')
+        self.server.stop()
+        print 'OSC Sequencer: terminated'
 
+
+
+    def exit(self,*args):
+        self.exiting = True
 
     @liblo.make_method('/Sequencer/Play', None)
     def play(self):
@@ -93,7 +105,7 @@ class Sequencer(object):
     def disable_all(self, path, args):
 
         for s in self.sequences:
-            self.sequences[s].enable(0)
+            self.sequences[s].toggle(0)
         for s in self.scenes:
             self.stop_scene(False,[s])
 
@@ -116,7 +128,7 @@ class Sequencer(object):
             pids = self.scenes_subprocesses[self.scenes[args[0]].pid]
             for pid in pids:
                 try:
-                    kill(pid, SIGKILL)
+                    kill(pid, signal.SIGKILL)
                 except:
                     pass
             del self.scenes_subprocesses[self.scenes[args[0]].pid]
