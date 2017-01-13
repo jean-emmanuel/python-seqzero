@@ -31,8 +31,10 @@ class Sequencer(object):
         self.bpm = bpm
         self.port = port
         self.target = target.split(' ') if target is not None else []
+        self.clock = time()
         self.cursor = 0
         self.is_playing = 0
+        self.is_paused = 0
         self.sequences = {}
         self.scenes = {}
         self.scenes_list = scenes
@@ -54,8 +56,6 @@ class Sequencer(object):
 
         print 'OSC Sequencer: started'
 
-        clock = time()
-
         while not self.exiting:
 
             if self.is_playing:
@@ -65,17 +65,18 @@ class Sequencer(object):
 
                 self.cursor += 1
 
-                while time() - clock < 60./self.bpm and self.trigger == 0:
+                while time() - self.clock < 60. / self.bpm and self.trigger == 0:
                     sleep(0.001)
 
-                clock += 60./self.bpm
+                self.clock += 60. / self.bpm
 
                 if self.trigger == 1:
                     self.cursor = 0
                     self.trigger = 0
-                    clock = time()
+                    self.clock = time()
 
             else:
+
                 sleep(0.001)
 
 
@@ -98,11 +99,14 @@ class Sequencer(object):
         Make the sequencer play and read enabled sequnces
         """
 
-        if (self.is_playing):
+        if self.is_playing:
              return self.trig()
 
         self.is_playing = 1
         self.cursor = 0
+        self.trigger = 0
+        self.clock = time()
+
 
 
     @make_method('/Stop', None)
@@ -117,6 +121,9 @@ class Sequencer(object):
         """
         Reset the sequencer's cursor on next beat : sequences restart from beginning
         """
+        if not self.is_playing:
+             return self.play()
+
         self.trigger = 1
 
 
