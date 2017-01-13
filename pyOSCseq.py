@@ -3,7 +3,7 @@
 from liblo import ServerThread, make_method
 from time import sleep , time
 from random import random
-from multiprocessing import Manager, Process
+from multiprocessing import Manager, Process, current_process
 from os import kill
 from signal import signal, SIGINT, SIGTERM, SIGKILL
 
@@ -284,7 +284,7 @@ class Sequencer(object):
                 args[-1] = a*i+start
                 if mode == 'integer':
                     args[-1] = int(args[-1])
-                self.send(args)
+                self.send(*args)
                 if i!=nb_step:
                     sleep(framelength)
 
@@ -298,7 +298,7 @@ class Sequencer(object):
         def threaded(args, nb_repeat, interval):
 
             for i in range(nb_repeat):
-                self.send(args)
+                self.send(*args)
                 sleep(interval)
 
         self.registerSceneSubprocess(threaded,[args, nb_repeat, interval, function])
