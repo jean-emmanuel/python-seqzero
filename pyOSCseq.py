@@ -1,15 +1,32 @@
 # encoding: utf-8
 
-import liblo
+from liblo import ServerThread, make_method
 from time import sleep , time
 from random import random
-from multiprocessing import *
+from multiprocessing import Manager, Process
 from os import kill
-import signal
+from signal import signal, SIGINT, SIGTERM, SIGKILL
+
+class Server(ServerThread):
+    """
+    OCS Server with namespace prefixed to osc methods
+    """
+    def __init__(self, namespace, **kwargs):
+
+        self.namespace = namespace if namespace[0] == '/' else '/' + namespace
+
+        ServerThread.__init__(self, **kwargs)
+
+    def add_method(self, path, typespec, func, user_data=None):
+
+        ServerThread.add_method(self, self.namespace + path, typespec, func, user_data=None)
 
 class Sequencer(object):
+    """
+    OSC Sequencer
+    """
 
-    def __init__(self, bpm=120, port=12345, target=None, scenes=None):
+    def __init__(self, name='Sequencer', bpm=120, port=12345, target=None, scenes=None):
 
         self.bpm = bpm
         self.port = port
@@ -22,15 +39,18 @@ class Sequencer(object):
         self.scenes_subprocesses = Manager().dict() # this will be shared accross processes
         self.trigger = 0
 
-        self.server = liblo.ServerThread(self.port)
+        self.server = Server(port=self.port, namespace=name)
         self.server.register_methods(self)
         self.server.start()
 
         self.exiting = False
-        signal.signal(signal.SIGINT, self.exit)
-        signal.signal(signal.SIGTERM, self.exit)
+        signal(SIGINT, self.exit)
+        signal(SIGTERM, self.exit)
 
     def start(self):
+        """
+        Start the sequencer main loop
+        """
 
         print 'OSC Sequencer: started'
 
@@ -57,10 +77,16 @@ class Sequencer(object):
 
 
     def exit(self,*args):
+        """
+        Handle process termination gracefully (stop the main loop)
+        """
         self.exiting = True
 
-    @liblo.make_method('/Sequencer/Play', None)
+    @make_method('/Play', None)
     def play(self):
+        """
+        Make the sequencer play and read enabled sequnces
+        """
 
         if (self.is_playing):
              return self.trig()
@@ -69,48 +95,64 @@ class Sequencer(object):
         self.cursor = 0
 
 
-    @liblo.make_method('/Sequencer/Stop', None)
+    @make_method('/Stop', None)
     def stop(self):
-
+        """
+        Stop the sequencer
+        """
         self.is_playing = 0
 
-    @liblo.make_method('/Sequencer/Trigger', None)
+    @make_method('/Trigger', None)
     def trig(self):
-
+        """
+        Reset the sequencer's cursor on next beat : sequences restart from beginning
+        """
         self.trigger = 1
 
 
-    @liblo.make_method('/Sequencer/Bpm', 'i')
+    @make_method('/Bpm', 'i')
     def set_bpm(self, path, args):
-        print args
-
+        """
+        Set the sequencer's bpm
+        """
         self.bpm = args[0]
 
-    @liblo.make_method('/Sequencer/Sequence/Toggle', 'si')
+    @make_method('/Sequence/Toggle', 'si')
     def toggle_sequence(self,path,args):
-
+        """
+        Toggle a sequence's state
+        """
         self.sequences[args[0]].toggle(args[1])
 
-    @liblo.make_method('/Sequencer/Sequence/Enable', 's')
+    @make_method('/Sequence/Enable', 's')
     def enable_sequence(self,path,args):
-
+        """
+        Enable a sequence
+        """
         self.sequences[args[0]].toggle(1)
 
-    @liblo.make_method('/Sequencer/Sequence/Disable', 's')
+    @make_method('/Sequence/Disable', 's')
     def disable_sequence(self,path,args):
-
+        """
+        Disable a sequence
+        """
         self.sequences[args[0]].toggle(0)
 
-    @liblo.make_method('/Sequencer/DisableAll', None)
+    @make_method('/DisableAll', None)
     def disable_all(self, path, args):
-
+        """
+        Stop all sequences and scenes
+        """
         for s in self.sequences:
             self.sequences[s].toggle(0)
         for s in self.scenes:
             self.stop_scene(False,[s])
 
-    @liblo.make_method('/Sequencer/Scene/Play', 's')
+    @make_method('/Scene/Play', 's')
     def play_scene(self,path,args):
+        """
+        Start a scene (restart it if its already playing)
+        """
 
         if args[0] in self.scenes:
             self.stop_scene(False,[args[0]])
@@ -121,14 +163,17 @@ class Sequencer(object):
             self.scenes[args[0]].start()
 
 
-    @liblo.make_method('/Sequencer/Scene/Stop', 's')
+    @make_method('/Scene/Stop', 's')
     def stop_scene(self,path,args):
+        """
+        Stop a scene
+        """
 
         if self.scenes[args[0]].pid in self.scenes_subprocesses:
             pids = self.scenes_subprocesses[self.scenes[args[0]].pid]
             for pid in pids:
                 try:
-                    kill(pid, signal.SIGKILL)
+                    kill(pid, SIGKILL)
                 except:
                     pass
             del self.scenes_subprocesses[self.scenes[args[0]].pid]
@@ -136,40 +181,51 @@ class Sequencer(object):
         self.scenes[args[0]].terminate()
         self.scenes[args[0]].join()
 
-    @liblo.make_method('/Sequencer/Debug', None)
+    @make_method('/Debug', None)
     def log(self,path,args):
+        """
+        Log something in the console
+        """
 
         print '[debug] Sequencer says: ' + str(args)
 
-    def addSequence(self,name,events):
+    def addSequence(self, name, steps):
+        """
+        Add a sequence
+        """
 
-        self.sequences[name] = self.Sequence(self,name,events)
+        self.sequences[name] = self.Sequence(self, name, steps)
 
-    def addRandomSequence(self,name,events,steps):
-        ''' This method adds a randomized sequence with NON-REPEATING steps'''
+    def addRandomSequence(self, name, steps, n_steps):
+        """
+        Add a randomized sequence with NON-REPEATING steps
+        """
 
-        eventsr=[]
-        oldir=-1
-        for i in range(0, steps-1):
-            ir = random()*len(events)
+        stepsR = []
+        oldir = -1
+        for i in range(0, n_steps - 1):
+            ir = random()*len(steps)
             if i == 0:
                 origin = int(ir) # detection du premier pas pour le bouclage de la boucle
-            if i < steps-1:
+            if i < n_steps - 1:
                 while int(ir) == oldir:
-                    ir = random()*len(events)
+                    ir = random()*len(steps)
             else:
                 while int(ir) == oldir or int(ir) == origin:
-                    ir = random()*len(events)
-            eventsr.append(events[int(ir)])
+                    ir = random()*len(steps)
+            stepsR.append(steps[int(ir)])
             oldir = int(ir)
-        self.sequences[name] = self.sequence(self,name,eventsr)
+
+        self.sequences[name] = self.sequence(self,name,stepsR)
 
     def addClip(self,name,events):
 
         self.clips[name] = self.clip(self,name,events)
 
     def playStep(self,args):
-
+        """
+        Parse a Sequence's step
+        """
         if not args:
             return
 
@@ -179,8 +235,11 @@ class Sequencer(object):
         else:
             self.send(*args)
 
-    def send(self,*args):
-        path = str(args[0])
+    def send(self, path, *args):
+        """
+        Send osc messages
+        """
+
         if path[0]== ':':
             self.server.send('osc.udp://localhost:'+str(self.port), path[1:], *args[1:])
 
@@ -189,6 +248,9 @@ class Sequencer(object):
                 self.server.send('osc.udp://'+self.target[i], path, *args[1:])
 
     def registerSceneSubprocess(self,target,args):
+        """
+        Register threaded functions (animate, repeat) to stop them when stopping the scene
+        """
 
         process = Process(target=target,args=args)
         process.start()
