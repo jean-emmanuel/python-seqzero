@@ -54,18 +54,26 @@ class Sequencer(object):
 
         print 'OSC Sequencer: started'
 
+        lantency = 0
+
         while not self.exiting:
 
             if self.is_playing:
-                begin = time()
+                begin = time() + lantency
+
                 for name in self.sequences:
                     self.playStep(self.sequences[name].getStep(self.cursor))
+
                 self.cursor += 1
+
                 while time() - begin < 60./self.bpm and self.trigger == 0:
                     sleep(0.001)
+
                 if self.trigger == 1:
                     self.cursor = 0
                     self.trigger = 0
+
+                latency = time() - begin - 60./self.bpm
 
             else:
                 sleep(0.001)
