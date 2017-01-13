@@ -241,11 +241,11 @@ class Sequencer(object):
         """
 
         if path[0]== ':':
-            self.server.send('osc.udp://localhost:'+str(self.port), path[1:], *args[1:])
+            self.server.send('osc.udp://localhost:'+str(self.port), path[1:], *args)
 
         else:
             for i in range(len(self.target)):
-                self.server.send('osc.udp://'+self.target[i], path, *args[1:])
+                self.server.send('osc.udp://'+self.target[i], path, *args)
 
     def registerSceneSubprocess(self,target,args):
         """
