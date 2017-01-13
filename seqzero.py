@@ -21,6 +21,7 @@ class Server(ServerThread):
 
         ServerThread.add_method(self, self.namespace + path, typespec, func, user_data=None)
 
+
 class Sequencer(object):
     """
     OSC Sequencer
@@ -358,7 +359,7 @@ class Sequencer(object):
         def getStep(self,cursor):
 
             if not self.is_playing:
-                return False
+                return None
 
             return self.steps[cursor%self.beats]
 

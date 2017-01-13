@@ -5,7 +5,7 @@
 import sys
 sys.path.append("..")
 
-from pyOSCseq import Sequencer
+from seqzero import Sequencer
 from liblo import send
 
 import scenes

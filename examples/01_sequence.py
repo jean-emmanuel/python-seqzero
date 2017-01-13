@@ -3,7 +3,7 @@
 import sys
 sys.path.append("..")
 
-from pyOSCseq import Sequencer
+from seqzero import Sequencer
 from liblo import send
 
 # Instanciate a sequencer listening on port 12345

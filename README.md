@@ -1,4 +1,4 @@
-# pyOSCseq
+# seqzero
 
 The minimalist headless osc sequencer that does the job
 
