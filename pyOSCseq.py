@@ -65,7 +65,7 @@ class Sequencer(object):
 
                 self.cursor += 1
 
-                while time() - origin < 60./self.bpm and self.trigger == 0:
+                while time() - clock < 60./self.bpm and self.trigger == 0:
                     sleep(0.001)
 
                 clock += 60./self.bpm
