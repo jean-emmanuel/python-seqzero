@@ -57,11 +57,11 @@ class Sequencer(object):
         while not self.exiting:
 
             if self.is_playing:
-                debut = time()
+                begin = time()
                 for name in self.sequences:
                     self.playStep(self.sequences[name].getStep(self.cursor))
                 self.cursor += 1
-                while time() - debut < 60./self.bpm and self.trigger == 0:
+                while time() - begin < 60./self.bpm and self.trigger == 0:
                     sleep(0.001)
                 if self.trigger == 1:
                     self.cursor = 0
@@ -281,12 +281,14 @@ class Sequencer(object):
             a = float(end-start)/nb_step
             args.append(0)
             for i in range(nb_step+1):
+                begin = time()
                 args[-1] = a*i+start
                 if mode == 'integer':
                     args[-1] = int(args[-1])
                 self.send(*args)
                 if i!=nb_step:
-                    sleep(framelength)
+                    while time() - begin < framelength:
+                        sleep(0.001)
 
         self.registerSceneSubprocess(threaded,[args, start, end, duration, framelength, mode])
 
@@ -298,8 +300,10 @@ class Sequencer(object):
         def threaded(args, nb_repeat, interval):
 
             for i in range(nb_repeat):
+                begin = time()
                 self.send(*args)
-                sleep(interval)
+                while time() - begin < interval:
+                    sleep(0.001)
 
         self.registerSceneSubprocess(threaded,[args, nb_repeat, interval, function])
 
