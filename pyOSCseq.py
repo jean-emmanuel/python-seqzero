@@ -54,8 +54,7 @@ class Sequencer(object):
 
         print 'OSC Sequencer: started'
 
-        latency = None
-        origin = time()
+        clock = time()
 
         while not self.exiting:
 
@@ -69,12 +68,12 @@ class Sequencer(object):
                 while time() - origin < 60./self.bpm and self.trigger == 0:
                     sleep(0.001)
 
-                origin += 60./self.bpm
+                clock += 60./self.bpm
 
                 if self.trigger == 1:
                     self.cursor = 0
                     self.trigger = 0
-                    origin = time()
+                    clock = time()
 
             else:
                 sleep(0.001)

@@ -14,8 +14,10 @@ seq = Sequencer(bpm=120, port=12345, target='localhost:5555 localhost:10001')
 
 # Add a sequence
 seq.addSequence('test',[
-    ['/step', 1],
-    ['/step',2]
+    [['/step', 1]],
+    [['/step',0]],
+    [['/step', 1]],
+    [['/step',0]]
 ])
 
 # Enale the sequence
