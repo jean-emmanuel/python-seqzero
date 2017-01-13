@@ -34,7 +34,6 @@ class Sequencer(object):
         self.clock = time()
         self.cursor = 0
         self.is_playing = 0
-        self.is_paused = 0
         self.sequences = {}
         self.scenes = {}
         self.scenes_list = scenes
@@ -107,7 +106,17 @@ class Sequencer(object):
         self.trigger = 0
         self.clock = time()
 
+    @make_method('/Resume', None)
+    def resume(self):
+        """
+        Make the sequencer play from where is stopped
+        """
 
+        if not self.is_playing:
+             return self.play()
+
+        self.is_playing = 1
+        self.clock = time()
 
     @make_method('/Stop', None)
     def stop(self):
