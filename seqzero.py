@@ -32,7 +32,7 @@ class Sequencer(object):
         self.bpm = bpm
         self.port = port
         self.target = target.split(' ') if target is not None else []
-        self.clock = time()
+        self.timer = Timer(self)
         self.cursor = 0
         self.is_playing = 0
         self.sequences = {}
@@ -65,15 +65,12 @@ class Sequencer(object):
 
                 self.cursor += 1
 
-                while time() - self.clock < 60. / self.bpm and self.trigger == 0:
-                    sleep(0.001)
-
-                self.clock += 60. / self.bpm
+                self.timer.wait(1, 'beat')
 
                 if self.trigger == 1:
                     self.cursor = 0
                     self.trigger = 0
-                    self.clock = time()
+                    self.timer.reset()
 
             else:
 
@@ -105,7 +102,7 @@ class Sequencer(object):
         self.is_playing = 1
         self.cursor = 0
         self.trigger = 0
-        self.clock = time()
+        self.timer.reset()
 
     @make_method('/Resume', None)
     def resume(self):
@@ -117,7 +114,7 @@ class Sequencer(object):
              return self.play()
 
         self.is_playing = 1
-        self.clock = time()
+        self.timer.reset()
 
     @make_method('/Stop', None)
     def stop(self):
@@ -186,7 +183,7 @@ class Sequencer(object):
             del self.scenes[args[0]]
 
         if hasattr(self.scenes_list, args[0]):
-            self.scenes[args[0]] = Process(target=self.scenes_list.__dict__[args[0]], args=[self])
+            self.scenes[args[0]] = Process(target=self.scenes_list.__dict__[args[0]], args=[self, Timer(self)])
             self.scenes[args[0]].start()
 
 
@@ -221,7 +218,7 @@ class Sequencer(object):
         Add a sequence
         """
 
-        self.sequences[name] = self.Sequence(self, name, steps)
+        self.sequences[name] = Sequence(self, name, steps)
 
     def addRandomSequence(self, name, steps, n_steps):
         """
@@ -302,20 +299,25 @@ class Sequencer(object):
         - framelength (s) : delay between each step
         """
         def threaded(args, start, end, duration, framelength, mode):
-            args = [args] if type(args) != list else args
+            message = [args] if type(args) != list else args
             framelength = duration / 10. if framelength == 0 else framelength
             nb_step = int(round(1.0 * duration / framelength))
             a = float(end - start) / nb_step
-            args.append(0)
+            timer = Timer(self)
+
+            message.append(0)
+
             for i in range(nb_step + 1):
-                begin = time()
-                args[-1] = a * i + start
+
+                message[-1] = a * i + start
+
                 if mode == 'integer':
-                    args[-1] = int(args[-1])
-                self.send(*args)
+                    message[-1] = int(message[-1])
+
+                self.send(*message)
+
                 if i != nb_step:
-                    while time() - begin < framelength:
-                        sleep(0.001)
+                    timer.wait(framelength, 'seconds')
 
         self.registerSceneSubprocess(threaded, [args, start, end, duration, framelength, mode])
 
@@ -326,11 +328,12 @@ class Sequencer(object):
         """
         def threaded(args, nb_repeat, interval):
 
+            timer = Timer(self)
+
             for i in range(nb_repeat):
                 begin = time()
                 self.send(*args)
-                while time() - begin < interval:
-                    sleep(0.001)
+                timer.wait(interval, 'seconds')
 
         self.registerSceneSubprocess(threaded, [args, nb_repeat, interval, function])
 
@@ -338,31 +341,51 @@ class Sequencer(object):
         """Convert beats to seconds)"""
         return 60. / self.bpm * beats
 
-    def wait(self, beats):
-        """
-        Wait function: sleep function mapped to the sequencer's bpm
-        - beats: number of beats to wait
-        """
-        return sleep(self.beatsToSeconds(beats))
 
-    class Sequence(object):
-        """
-        Sequence subclass : event loop synchronized by the sequencer's tempo
-        """
-        def __init__(self, parent=None, name=None, steps=None):
+class Timer(object):
+    """
+    Timer with latency compensation
+    """
 
-            self.name = name
-            self.steps = steps
-            self.beats = len(self.steps)
-            self.is_playing = False
+    def __init__(self, sequencer):
 
-        def getStep(self, cursor):
+        self.sequencer = sequencer
+        self.clock = time()
 
-            if not self.is_playing:
-                return None
+    def reset(self):
 
-            return self.steps[cursor%self.beats]
+        self.clock = time()
 
-        def toggle(self, x):
+    def wait(self, n, mode='beats'):
 
-            self.is_playing = bool(x)
+        if mode[0] == 'b':
+            delay = self.sequencer.beatsToSeconds(n)
+        elif mode[0] == 's':
+            delay = n
+
+        while time() - self.clock < delay:
+            sleep(0.001)
+
+        self.clock += delay
+
+class Sequence(object):
+    """
+    Sequence: event loop synchronized by the sequencer's tempo
+    """
+    def __init__(self, parent=None, name=None, steps=None):
+
+        self.name = name
+        self.steps = steps
+        self.beats = len(self.steps)
+        self.is_playing = False
+
+    def getStep(self, cursor):
+
+        if not self.is_playing:
+            return None
+
+        return self.steps[cursor%self.beats]
+
+    def toggle(self, x):
+
+        self.is_playing = bool(x)

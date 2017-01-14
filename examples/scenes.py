@@ -1,8 +1,8 @@
-def a(sequencer):
+def a(sequencer, timer):
     sequencer.send('/scenes/a', 1)
     # wait 3 beats
-    sequencer.wait(3)
+    timer.wait(3)
     sequencer.send('/scenes/a', 2)
 
-def b(sequencer):
+def b(sequencer, timer):
     sequencer.animate('/scenes/b', start=1, end=10, duration=1)
