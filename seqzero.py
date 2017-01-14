@@ -1,5 +1,4 @@
 # encoding: utf-8
-
 from liblo import ServerThread, make_method
 from time import sleep, time
 from random import random
@@ -95,7 +94,7 @@ class Sequencer(object):
 
         self.is_playing = 1
         self.cursor = 0
-        self.timer.trig()
+        self.timer.reset()
 
     @make_method('/Resume', None)
     def resume(self):
@@ -355,10 +354,14 @@ class Timer(object):
         self.sequencer = sequencer
         self.trigger = 0
         self.clock = time()
+        self.time = time()
+        self.shift = 0
 
     def reset(self):
 
         self.clock = time()
+        self.time = time()
+        self.shift = 0
 
     def trig(self):
 
@@ -378,7 +381,9 @@ class Timer(object):
         if self.trigger:
             self.trigger = 0
         else:
-            self.clock += delay
+            self.shift += self.time + delay - time()
+            self.clock += self.shift + delay
+            self.time = time()
 
 class Sequence(object):
     """
