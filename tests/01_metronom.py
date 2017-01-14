@@ -1,56 +1,54 @@
 # encoding: utf-8
 
-bpm = 200
-
-
-from pyo import *
-
 import sys
 sys.path.append("..")
 
+from seqzero import Sequencer
+from pyo import Server, Metro, Trig, Timer, Change, OscDataReceive, TrigFunc
+
+
+bpm = 120
 
 s = Server(audio="jack")
 s.boot()
 s.start()
 
-attack1 = Adsr(dur=0.2, mul=.5)
-attack2 = Adsr(dur=0.2, mul=.5)
-sine1 = Sine(freq=2000, mul=attack1).mix(2).out()
-sine2 = Sine(freq=2000, mul=attack2).mix(2).out()
 
+# Metronom
+metronom = Metro(60. / bpm)
 
-
-
-
-from seqzero import Sequencer
-
+# Sequencer
 seq = Sequencer(bpm=bpm, port=12345, target='localhost:9900')
-
 seq.addSequence('metronom',[
+    ['/tic'],
     ['/tic'],
 ])
 
-
-trigged = False
-
-def tic(*args):
-    attack1.play()
-
-def tac(*args):
-    global trigged
-    attack2.play()
-    if trigged is False:
-        trigged = True
-        seq.send(':/Sequencer/Trigger')
-
+# Sequencer's monitor
+t = False
+sequencer_trig = Trig()
+def tic(a):
+    sequencer_trig.play()
+    # launch the metronom at first msg
+    global t
+    if not t:
+        metronom.play()
 
 sequencer_monitor = OscDataReceive(9900, "/tic", tic)
-metronom = Pattern(tac, 60. / bpm)
 
+
+# Compute & print difference between the two
+timer = Timer(metronom, sequencer_trig)
+
+def print_diff():
+    print abs(timer.get() - 0.25) - 0.25
+
+change = Change(timer)
+printer = TrigFunc(change, print_diff)
 
 
 seq.send(':/Sequencer/Sequence/Enable', 'metronom')
-seq.send(':/Sequencer/Play')
 
-metronom.play()
+seq.play()
+
 seq.start()
