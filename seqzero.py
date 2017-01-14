@@ -39,7 +39,6 @@ class Sequencer(object):
         self.scenes = {}
         self.scenes_list = scenes
         self.scenes_subprocesses = Manager().dict() # this will be shared accross processes
-        self.trigger = 0
 
         self.server = Server(port=self.port, namespace=name)
         self.server.register_methods(self)
@@ -66,11 +65,6 @@ class Sequencer(object):
                 self.cursor += 1
 
                 self.timer.wait(1, 'beat')
-
-                if self.trigger == 1:
-                    self.cursor = 0
-                    self.trigger = 0
-                    self.timer.reset()
 
             else:
 
@@ -101,8 +95,7 @@ class Sequencer(object):
 
         self.is_playing = 1
         self.cursor = 0
-        self.trigger = 0
-        self.timer.reset()
+        self.timer.trig()
 
     @make_method('/Resume', None)
     def resume(self):
@@ -131,8 +124,8 @@ class Sequencer(object):
         if not self.is_playing:
              return self.play()
 
-        self.trigger = 1
-
+        self.timer.trig()
+        self.cursor = 0
 
     @make_method('/Bpm', 'i')
     def set_bpm(self, path, args):
@@ -360,11 +353,17 @@ class Timer(object):
     def __init__(self, sequencer):
 
         self.sequencer = sequencer
+        self.trigger = 0
         self.clock = time()
 
     def reset(self):
 
         self.clock = time()
+
+    def trig(self):
+
+        self.trigger = 1
+        self.reset()
 
     def wait(self, n, mode='beats'):
 
@@ -373,10 +372,13 @@ class Timer(object):
         elif mode[0] == 's':
             delay = n
 
-        while time() - self.clock < delay:
+        while time() - self.clock < delay and not self.trigger:
             sleep(0.001)
 
-        self.clock += delay
+        if self.trigger:
+            self.trigger = 0
+        else:
+            self.clock += delay
 
 class Sequence(object):
     """
