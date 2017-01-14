@@ -13,7 +13,6 @@ It is written in [python](https://www.youtube.com/watch?v=asUyK6JWt9U), you'll n
 - play/stop `scenes`
 - is controllabe via osc
 - it is not real-time
-- it compensates its own latency: it's not very accurate but its error dont grow
 
 ### `sequences`
 
