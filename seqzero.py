@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 from liblo import ServerThread, make_method
-from time import sleep , time
+from time import sleep, time
 from random import random
 from multiprocessing import Manager, Process, current_process
 from os import kill
@@ -53,7 +53,7 @@ class Sequencer(object):
         Start the sequencer main loop
         """
 
-        print 'OSC Sequencer: started'
+        print('OSC Sequencer: started')
 
         while not self.exiting:
 
@@ -74,7 +74,7 @@ class Sequencer(object):
 
         self.disable_all('', '')
         self.server.stop()
-        print 'OSC Sequencer: terminated'
+        print('OSC Sequencer: terminated')
 
 
 
@@ -204,7 +204,7 @@ class Sequencer(object):
         Log something in the console
         """
 
-        print '[debug] Sequencer says: ' + str(args)
+        print('[debug] Sequencer says: ' + str(args))
 
     def addSequence(self, name, steps):
         """

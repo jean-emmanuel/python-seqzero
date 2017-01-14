@@ -38,10 +38,11 @@ sequencer_monitor = OscDataReceive(9900, "/tic", tic)
 
 
 # Compute & print difference between the two
-timer = Timer(metronom, sequencer_trig)
+timer = Timer(sequencer_trig, metronom)
 
 def print_diff():
-    print abs(timer.get() - 0.25) - 0.25
+    # print abs(timer.get() - 0.25) - 0.25
+    print(timer.get())
 
 change = Change(timer)
 printer = TrigFunc(change, print_diff)
