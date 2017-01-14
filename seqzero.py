@@ -289,37 +289,40 @@ class Sequencer(object):
         self.scenes_subprocesses[parentPid] = proxy
 
 
-    def animate(self, args, start, end, duration, framelength=0, mode='float'):
+    def animate(self, args, start, end, duration, framerate=10, mode='float'):
         """
         Animate function for pyOSCseq's osc sending method :
         Execute the given function for different values of its last argument,
         computed between 'start' and 'end'.
         - args : osc path string or tuple containing the first arguments passed to the function (these won't be animated)
         - duration (s) : time to complete the animation
-        - framelength (s) : delay between each step
+        - framerate (hz) : frames per seconds
+        - mode ('float'|'integer'): send floats or integers
         """
-        def threaded(args, start, end, duration, framelength, mode):
-            message = [args] if type(args) != list else args
-            framelength = duration / 10. if framelength == 0 else framelength
-            nb_step = int(round(1.0 * duration / framelength))
-            a = float(end - start) / nb_step
+        def threaded(args, start, end, duration, framerate=10, mode='float'):
+
             timer = Timer(self)
+
+            message = [args] if type(args) != list else args
+            framelength = 1.0 / (duration * framerate)
+            n_steps = int(round(duration / framelength))
+            coefficient = float(end - start) / n_steps
 
             message.append(0)
 
-            for i in range(nb_step + 1):
+            for x in range(n_steps + 1):
 
-                message[-1] = a * i + start
+                message[-1] = coefficient * x + start
 
                 if mode == 'integer':
                     message[-1] = int(message[-1])
 
                 self.send(*message)
 
-                if i != nb_step:
+                if x != n_steps:
                     timer.wait(framelength, 'seconds')
 
-        self.registerSceneSubprocess(threaded, [args, start, end, duration, framelength, mode])
+        self.registerSceneSubprocess(threaded, [args, start, end, duration, framerate, mode])
 
     def repeat(self, args, nb_repeat, interval):
         """
