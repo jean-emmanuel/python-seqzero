@@ -283,7 +283,7 @@ class Sequencer(object):
 
         proxy = []
         if parentPid in self.scenes_subprocesses:
-            proxy= self.scenes_subprocesses[parentPid]
+            proxy = self.scenes_subprocesses[parentPid]
         proxy.append(process.pid)
 
         self.scenes_subprocesses[parentPid] = proxy
@@ -298,28 +298,35 @@ class Sequencer(object):
         - duration (s) : time to complete the animation
         - framerate (hz) : frames per seconds
         - mode ('float'|'integer'): send floats or integers
+        - easing (function): custom easing function taking (start, end, frame, n_frames) for arguments
+                             default is linear: it returns (end - start) / n_frames * frame + start
+                             - frame: current frame number
+                             - n_frames: total number of frames
         """
-        def threaded(args, start, end, duration, framerate=10, mode='float'):
+        def threaded(args, start, end, duration, framerate=10, mode='float', easing=None):
 
             timer = Timer(self)
 
             message = [args] if type(args) != list else args
             framelength = 1.0 / (duration * framerate)
-            n_steps = int(round(duration / framelength))
-            coefficient = float(end - start) / n_steps
+            n_frames = int(round(duration / framelength))
+            coefficient = float(end - start) / n_frames
 
             message.append(0)
 
-            for x in range(n_steps + 1):
+            for frame in range(n_frames + 1):
 
-                message[-1] = coefficient * x + start
+                if callable(easing):
+                    message[-1] = easing(start, end, frame, n_frames)
+                else:
+                    message[-1] = coefficient * frame + start
 
                 if mode == 'integer':
                     message[-1] = int(message[-1])
 
                 self.send(*message)
 
-                if x != n_steps:
+                if frame != n_frames:
                     timer.wait(framelength, 'seconds')
 
         self.registerSceneSubprocess(threaded, [args, start, end, duration, framerate, mode])
