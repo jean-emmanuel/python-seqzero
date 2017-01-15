@@ -21,11 +21,11 @@ def print_diff():
     global t, error, bpm
     if bpm != seq.bpm:
         bpm=seq.bpm
-        diff = 0
+        error = 0
         t = time()
         return
     nt = time()
-    error += (nt - t) - 60. / bpm
+    error += 60. / bpm - (nt - t)
     t = nt
     print("Cumulated error: %s%.3f ms (%5.2f" % (' ' if str(error)[0]!='-' else '',round(1000000 * error)/1000, abs(100 * error / (60. / bpm))) + "%) at " + str(bpm) + " bpm")
 

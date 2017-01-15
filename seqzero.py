@@ -382,7 +382,7 @@ class Timer(object):
             self.trigger = 0
         else:
             t = time()
-            self.shift += self.time + delay - t
+            self.shift += delay - (t - self.time)
             self.clock += self.shift + delay
             self.time = t
 
