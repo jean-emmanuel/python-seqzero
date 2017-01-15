@@ -12,26 +12,29 @@ bpm = 20000
 # Sequencer
 seq = Sequencer(bpm=bpm, port=12345, target='localhost:9900')
 seq.addSequence('metronom',[
-    ['/tic'],
-    ['/tic'],
+    ['/tic',1],
+    ['/tic',0]
 ])
 
-shift = 0
+diff = 0
+n = 1
 def print_diff():
-    global t, shift
+    global t, diff, n, bpm
     if bpm != seq.bpm:
-        shift=0
-    nt = time()
-    shift += 60. / seq.bpm - (nt - t)
+        bpm=seq.bpm
+        diff = 0
+        n = 1
+        t= time()
+        return
+    diff += time() - t
+    print("Average error = %s%.3f ms"  % (' ' if str((60./bpm - 1.0 * diff / n))[0] != '-' else '',round((60./bpm - 1.0 * diff / n) * 1000000) / 1000))
+    n += 1
     t = time()
 
-    print('shift: ' + str(shift) + 's')
 
 sequencer_monitor = ServerThread(port=9900)
 sequencer_monitor.add_method('/tic', None, print_diff)
 sequencer_monitor.start()
-
-
 
 
 seq.send(':/Sequencer/Sequence/Enable', 'metronom')
