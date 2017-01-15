@@ -16,20 +16,18 @@ seq.addSequence('metronom',[
     ['/tic',0]
 ])
 
-diff = 0
-n = 1
+error = 0
 def print_diff():
-    global t, diff, n, bpm
+    global t, error, bpm
     if bpm != seq.bpm:
         bpm=seq.bpm
         diff = 0
-        n = 1
-        t= time()
+        t = time()
         return
-    diff += time() - t
-    print("Average error = %s%.3f ms"  % (' ' if str((60./bpm - 1.0 * diff / n))[0] != '-' else '',round((60./bpm - 1.0 * diff / n) * 1000000) / 1000))
-    n += 1
-    t = time()
+    nt = time()
+    error += (nt - t) - 60. / bpm
+    t = nt
+    print("Cumulated error: %s%.3f ms" % (' ' if str(error)[0]!='-' else '',round(1000000 * error)/1000))
 
 
 sequencer_monitor = ServerThread(port=9900)
