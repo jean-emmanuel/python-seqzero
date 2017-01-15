@@ -7,7 +7,7 @@ from seqzero import Sequencer
 from liblo import ServerThread
 from time import time
 
-bpm = 20000
+bpm = 2000
 
 # Sequencer
 seq = Sequencer(bpm=bpm, port=12345, target='localhost:9900')
@@ -27,7 +27,7 @@ def print_diff():
     nt = time()
     error += (nt - t) - 60. / bpm
     t = nt
-    print("Cumulated error: %s%.3f ms" % (' ' if str(error)[0]!='-' else '',round(1000000 * error)/1000))
+    print("Cumulated error: %s%.3f ms (%5.2f" % (' ' if str(error)[0]!='-' else '',round(1000000 * error)/1000, abs(100 * error / (60. / bpm))) + "%) at " + str(bpm) + " bpm")
 
 
 sequencer_monitor = ServerThread(port=9900)
