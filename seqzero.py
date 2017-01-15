@@ -381,9 +381,10 @@ class Timer(object):
         if self.trigger:
             self.trigger = 0
         else:
-            self.shift += self.time + delay - time()
+            t = time()
+            self.shift += self.time + delay - t
             self.clock += self.shift + delay
-            self.time = time()
+            self.time = t
 
 class Sequence(object):
     """
