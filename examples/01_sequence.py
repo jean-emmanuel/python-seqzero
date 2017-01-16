@@ -21,10 +21,10 @@ seq.sequence_add('test',[
 ])
 
 # Enale the sequence
-send('osc.udp://localhost:12345', '/Sequencer/Sequence/Enable', 'test')
+seq.send(':/Sequencer/Sequence/Enable', 'test')
 
 # Start the sequencer
-send('osc.udp://localhost:12345', '/Sequencer/Play')
+seq.send(':/Sequencer/Play')
 
 seq.start()
 

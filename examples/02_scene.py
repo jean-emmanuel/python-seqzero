@@ -24,11 +24,12 @@ seq.sequence_add('test',[
 ])
 
 # Enale the sequence
-send('osc.udp://localhost:12345', '/Sequencer/Sequence/Enable', 'test')
+seq.send(':/Sequencer/Sequence/Enable', 'test')
 
 # Start the sequencer
-send('osc.udp://localhost:12345', '/Sequencer/Play')
+seq.send(':/Sequencer/Play')
 
 seq.start()
 
 # now listen on port 5555 with your favorite tool...
+# and send '/Sequencer/Scene/Play a' or '/Sequencer/Scene/Play b' on port 12345
