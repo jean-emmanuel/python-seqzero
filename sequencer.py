@@ -95,7 +95,7 @@ class Sequencer(object):
     @API('/Resume')
     def resume(self):
         """
-        Make the sequencer play from where is stopped
+        Make the sequencer play from where it stopped
         """
 
         if not self.is_playing:
@@ -126,6 +126,7 @@ class Sequencer(object):
     def set_bpm(self, bpm):
         """
         Set the sequencer's bpm
+        - bpm: integer
         """
         self.bpm = int(bpm)
 
@@ -137,6 +138,8 @@ class Sequencer(object):
     def sequence_toggle(self, name, state):
         """
         Toggle a sequence's state
+        - name: string
+        - state: integer (0/1)
         """
         self.sequences[name].toggle(state)
 
@@ -144,6 +147,7 @@ class Sequencer(object):
     def sequence_enable(self, name):
         """
         Enable a sequence
+        - name: string
         """
         self.sequences[name].toggle(1)
 
@@ -151,6 +155,7 @@ class Sequencer(object):
     def sequence_disable(self, name):
         """
         Disable a sequence
+        - name: string
         """
         if name == '*':
 
@@ -171,6 +176,8 @@ class Sequencer(object):
     def sequence_add(self, name, steps):
         """
         Add a sequence
+        - name: string
+        - steps: list
         """
 
         self.sequences[name] = Sequence(self, name, steps)
@@ -179,6 +186,9 @@ class Sequencer(object):
     def sequence_add_random(self, name, steps, n_steps):
         """
         Add a randomized sequence with NON-REPEATING steps
+        - name: string
+        - steps: list
+        - n_steps: integer
         """
 
         stepsR = []
@@ -201,6 +211,8 @@ class Sequencer(object):
     def sequence_play_step(self, name, cursor):
         """
         Parse a Sequence's step
+        - name: string
+        - cursor: integer
         """
 
         step = self.sequences[name].getStep(cursor)
@@ -223,6 +235,7 @@ class Sequencer(object):
     def scene_play(self, name):
         """
         Start a scene (restart it if its already playing)
+        - name: string
         """
 
         if name in self.scenes:
@@ -238,6 +251,7 @@ class Sequencer(object):
     def scene_stop(self, name):
         """
         Stop a scene
+        - name: string
         """
 
         if name == '*':
@@ -271,6 +285,8 @@ class Sequencer(object):
     def scene_run_subprocess(self, target, args):
         """
         Register threaded functions (animate, repeat) to stop them when stopping the scene
+        - taget: function
+        - args: list
         """
 
         process = Process(target=target, args=args)
@@ -297,6 +313,7 @@ class Sequencer(object):
     def log(self, *message):
         """
         Log something in the console
+        - *message: anything
         """
 
         print('[debug] Sequencer says: ' + str(message))
@@ -316,6 +333,8 @@ class Sequencer(object):
     def send(self, address, *args):
         """
         Send osc messages
+        - address: string
+        - *args: anything
         """
 
         if address[0] == ':':
