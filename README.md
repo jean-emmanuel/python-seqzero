@@ -9,7 +9,7 @@ It is written in [python](https://www.youtube.com/watch?v=asUyK6JWt9U), you'll n
 ### `sequencer`
 
 - has a `bpm`
-- is *step-by-step* (everything a quarter note)
+- is *step-by-step* (everything is a quarter note)
 - play/stop `sequences`
 - play/stop `scenes`
 - is controllabe via osc
