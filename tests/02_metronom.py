@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 import sys
-sys.path.append("..")
+sys.path.append("../..")
 
 from pyo import *
 from seqzero import Sequencer
