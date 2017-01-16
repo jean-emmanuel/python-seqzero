@@ -19,23 +19,27 @@ class Sequencer(object):
 
     def __init__(self, name='Sequencer', bpm=120, port=12345, target=None, scenes=None):
 
+        # Engine
         self.bpm = bpm
-        self.port = port
-        self.target = target.split(' ') if target is not None else []
         self.timer = Timer(self)
         self.cursor = 0
-        self.is_playing = 0
+        self.is_playing = False
+
+        # Sequences & Scenes
         self.sequences = {}
         self.scenes = {}
         self.scenes_list = scenes
         self.scenes_subprocesses = Manager().dict() # this will be shared accross processes
 
-        self.thread = None
-
+        # OSC
+        self.port = port
+        self.target = target.split(' ') if target is not None else []
         self.server = Server(port=self.port, namespace=name)
         self.server.register_methods(self)
         self.server.start()
 
+        # Process
+        self.thread = None
         self.exiting = False
         signal(SIGINT, self.exit)
         signal(SIGTERM, self.exit)
@@ -103,9 +107,9 @@ class Sequencer(object):
         if self.is_playing:
              return self.trig()
 
-        self.is_playing = 1
         self.cursor = 0
         self.timer.reset()
+        self.is_playing = True
 
     @API('/Resume')
     def resume(self):
@@ -116,7 +120,7 @@ class Sequencer(object):
         if not self.is_playing:
              return self.play()
 
-        self.is_playing = 1
+        self.is_playing = True
         self.timer.reset()
 
     @API('/Stop')
@@ -124,7 +128,7 @@ class Sequencer(object):
         """
         Stop the sequencer
         """
-        self.is_playing = 0
+        self.is_playing = False
 
     @API('/Trigger')
     def trig(self):
@@ -143,7 +147,7 @@ class Sequencer(object):
         Set the sequencer's bpm
         - bpm: integer
         """
-        self.bpm = int(bpm)
+        self.bpm = float(bpm)
 
     """
     Sequences
