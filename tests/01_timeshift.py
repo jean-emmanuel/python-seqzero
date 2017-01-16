@@ -16,7 +16,11 @@ seq.sequence_add('metronom',[
 ])
 
 error = 0
+t = 0
 def print_diff():
+    if t == 0:
+        t = time()
+        return
     global t, error, bpm
     if bpm != seq.bpm:
         bpm=seq.bpm
@@ -38,5 +42,4 @@ seq.send(':/Sequencer/Sequence/Enable', 'metronom')
 
 seq.play()
 
-t = time()
 seq.start()
