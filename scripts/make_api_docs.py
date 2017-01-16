@@ -7,8 +7,8 @@ doc = '# OSC API\n\n'
 def parse(m):
     global doc
 
-    address = '/Sequencer' + str(eval(m.group(2).replace(')',',)') )[0]).strip()
-    method  = m.group(4).replace('def ','').replace('self, ','').replace('self','').replace('):',')').strip()
+    method  = m.group(4).replace('def ','').replace('self, ','').replace('self','').replace('):',')').replace('*','').strip()
+    address = '/Sequencer' + str(eval(m.group(2).replace(')',',)') )[0]).strip() + ' ' + method[method.index('(')+1:method.index(')')].replace(',','')
     info    = m.group(5).strip().replace('    ','')
 
     doc += '### `%s`\n\n' % address
