@@ -17,7 +17,16 @@ class Sequencer(object):
     OSC Sequencer
     """
 
-    def __init__(self, name='Sequencer', bpm=120, port=12345, target=None, scenes=None):
+    def __init__(self, name='Sequencer', bpm=120, port=12345, target=[], scenes=None):
+        """
+        Sequencer contructor
+
+        Args:
+            name      (str): will be prepended to all OSC API addresses
+            bpm     (float): tempo in beats per minute
+            target   (list): 'ip:port' pairs to send the osc messages to
+            scenes (module): imported python module containing the scenes
+        """
 
         # Engine
         self.bpm = bpm
@@ -157,8 +166,10 @@ class Sequencer(object):
     def sequence_toggle(self, name, state):
         """
         Toggle a sequence's state
-        - name: string
-        - state: integer (0/1)
+
+        Args:
+            name  (str): sequence's name
+            state (int): 0 or 1
         """
         self.sequences[name].toggle(state)
 
@@ -166,7 +177,9 @@ class Sequencer(object):
     def sequence_enable(self, name):
         """
         Enable a sequence
-        - name: string
+
+        Args:
+            name  (str): sequence's name
         """
         self.sequences[name].toggle(1)
 
@@ -174,7 +187,9 @@ class Sequencer(object):
     def sequence_disable(self, name):
         """
         Disable a sequence
-        - name: string
+
+        Args:
+            name  (str): sequence's name
         """
         if name == '*':
 
@@ -195,8 +210,13 @@ class Sequencer(object):
     def sequence_add(self, name, steps):
         """
         Add a sequence
-        - name: string
-        - steps: list
+
+        Args:
+            name   (str): sequence's name
+            steps (list): steps cas be
+                - messages (list): ['/path', arg1, arg2]
+                - list of messages to be sent at the same time
+                - False or None for empty steps
         """
 
         self.sequences[name] = Sequence(self, name, steps)
@@ -205,9 +225,11 @@ class Sequencer(object):
     def sequence_add_random(self, name, steps, n_steps):
         """
         Add a randomized sequence with NON-REPEATING steps
-        - name: string
-        - steps: list
-        - n_steps: integer
+
+        Args:
+            name    (str): sequence's name
+            steps  (list): steps to shuffle
+            n_steps (int): total number of steps
         """
 
         stepsR = []
@@ -230,8 +252,10 @@ class Sequencer(object):
     def sequence_play_step(self, name, cursor):
         """
         Parse a Sequence's step
-        - name: string
-        - cursor: integer
+
+        Args:
+            name   (str): sequence's name
+            cursor (int): sequencer's transport position
         """
 
         step = self.sequences[name].getStep(cursor)
@@ -254,7 +278,9 @@ class Sequencer(object):
     def scene_play(self, name):
         """
         Start a scene (restart it if its already playing)
-        - name: string
+
+        Args:
+            name (str): scenes's name
         """
 
         if name in self.scenes:
@@ -270,7 +296,9 @@ class Sequencer(object):
     def scene_stop(self, name):
         """
         Stop a scene
-        - name: string
+
+        Args:
+            name (str): scenes's name
         """
 
         if name == '*':
@@ -304,8 +332,10 @@ class Sequencer(object):
     def scene_run_subprocess(self, target, args):
         """
         Register threaded functions (animate, repeat) to stop them when stopping the scene
-        - taget: function
-        - args: list
+
+        Args:
+            target (function): function to run in a new process
+            args       (list): arguments passed to the function
         """
 
         process = Process(target=target, args=args)
@@ -332,7 +362,9 @@ class Sequencer(object):
     def log(self, *message):
         """
         Log something in the console
-        - message: anything
+
+        Args:
+            message: anything
         """
 
         print('[debug] Sequencer says: ' + str(message))
@@ -352,8 +384,10 @@ class Sequencer(object):
     def send(self, address, *args):
         """
         Send osc messages
-        - address: string
-        - args: anything
+
+        Args:
+            address (str): osc address
+            args         : anything
         """
 
         if address[0] == ':':
@@ -374,14 +408,16 @@ class Sequencer(object):
         Animate function for pyOSCseq's osc sending method :
         Execute the given function for different values of its last argument,
         computed between 'start' and 'end'.
-        - args : osc address string or tuple containing the first arguments passed to the function (these won't be animated)
-        - duration (s) : time to complete the animation
-        - framerate (hz) : frames per seconds
-        - mode ('float'|'integer'): send floats or integers
-        - easing (function): custom easing function taking (start, end, frame, n_frames) for arguments
-                             default is linear: it returns (end - start) / n_frames * frame + start
-                             - frame: current frame number
-                             - n_frames: total number of frames
+
+        Args:
+            args   (str|list): osc address string or tuple containing the first arguments passed to the function (these won't be animated)
+            duration  (float): time to complete the animation in seconds
+            framerate (float): frames per seconds
+            mode        (str): output number format, 'float' or 'integer'
+            easing (function): custom easing function taking (start, end, frame, n_frames) for arguments
+                default is linear: it returns (end - start) / n_frames * frame + start
+                frame: current frame number
+                n_frames: total number of frames
         """
         def threaded(args, start, end, duration, framerate=10, mode='float', easing=None):
 
@@ -415,6 +451,11 @@ class Sequencer(object):
         """
         Repeat function for pyOSCseq's osc sending method :
         Execute the given function nb_repeat times, and waits interval seconds between each call
+
+        Args:
+            args      (list): osc message's address and arguments
+            nb_repeat  (int): numbers of repetition
+            interval (float): delay between iteration in seconds
         """
         def threaded(args, nb_repeat, interval):
 
