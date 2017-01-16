@@ -313,7 +313,7 @@ class Sequencer(object):
     def log(self, *message):
         """
         Log something in the console
-        - *message: anything
+        - message: anything
         """
 
         print('[debug] Sequencer says: ' + str(message))
@@ -334,7 +334,7 @@ class Sequencer(object):
         """
         Send osc messages
         - address: string
-        - *args: anything
+        - args: anything
         """
 
         if address[0] == ':':
