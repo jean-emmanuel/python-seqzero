@@ -17,14 +17,15 @@ class Sequencer(object):
     OSC Sequencer
     """
 
-    def __init__(self, name='Sequencer', bpm=120, port=12345, target=[], scenes=None):
+    def __init__(self, name='Sequencer', bpm=120, port=12345, target=None, scenes=None):
         """
         Sequencer contructor
 
         Args:
             name      (str): will be prepended to all OSC API addresses
             bpm     (float): tempo in beats per minute
-            target   (list): 'ip:port' pairs to send the osc messages to
+            target    (str): ip:port hosts separated by spaces
+                             (osc messages will be send to these)
             scenes (module): imported python module containing the scenes
         """
 
