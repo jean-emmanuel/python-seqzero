@@ -64,9 +64,6 @@ class Sequencer(object):
                 sleep(0.001)
 
 
-
-        self.disable_all('', '')
-        self.server.stop()
         print('OSC Sequencer: terminated')
 
     def exit(self, *args):
@@ -74,6 +71,8 @@ class Sequencer(object):
         Handle process termination gracefully (stop the main loop)
         """
         self.exiting = True
+        self.disable_all()
+        self.server.stop()
 
 
     """
