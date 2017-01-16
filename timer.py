@@ -10,6 +10,7 @@ class Timer(object):
     def __init__(self, sequencer):
 
         self.sequencer = sequencer
+        self.rate = 1 / 1000
         self.trigger = 0
         self.clock = time()
 
@@ -30,7 +31,7 @@ class Timer(object):
             delay = n
 
         while time() - self.clock < delay and not self.trigger and not self.sequencer.exiting:
-            sleep(0.001)
+            sleep(self.rate)
 
         if self.trigger:
             self.trigger = 0
