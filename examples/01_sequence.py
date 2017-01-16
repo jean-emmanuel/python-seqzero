@@ -13,7 +13,7 @@ seq = Sequencer(bpm=120, port=12345, target='localhost:5555 localhost:10001')
 
 
 # Add a sequence
-seq.addSequence('test',[
+seq.sequence_add('test',[
     [['/step', 1]],
     [['/step',0]],
     [['/step', 1]],

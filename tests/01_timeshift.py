@@ -11,7 +11,7 @@ bpm = 2000
 
 # Sequencer
 seq = Sequencer(bpm=bpm, port=12345, target='localhost:9900')
-seq.addSequence('metronom',[
+seq.sequence_add('metronom',[
     ['/tic']
 ])
 

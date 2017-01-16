@@ -1,25 +1,14 @@
 # encoding: utf-8
-from liblo import ServerThread, make_method
-from time import sleep, time
+
+from osc import Server, API
+from timer import Timer
+from sequence import Sequence
+
+from time import sleep
 from random import random
 from multiprocessing import Manager, Process, current_process
 from os import kill
 from signal import signal, SIGINT, SIGTERM, SIGKILL
-
-class Server(ServerThread):
-    """
-    OCS Server with namespace prefixed to osc methods
-    """
-    def __init__(self, namespace, **kwargs):
-
-        self.namespace = namespace if namespace[0] == '/' else '/' + namespace
-
-        ServerThread.__init__(self, **kwargs)
-
-    def add_method(self, path, typespec, func, user_data=None):
-
-        ServerThread.add_method(self, self.namespace + path, typespec, func, user_data=None)
-
 
 class Sequencer(object):
     """
@@ -47,6 +36,11 @@ class Sequencer(object):
         signal(SIGINT, self.exit)
         signal(SIGTERM, self.exit)
 
+
+    """
+    Engine
+    """
+
     def start(self):
         """
         Start the sequencer main loop
@@ -59,7 +53,7 @@ class Sequencer(object):
             if self.is_playing:
 
                 for name in self.sequences:
-                    self.playStep(self.sequences[name].getStep(self.cursor))
+                    self.sequence_play_step(name, self.cursor)
 
                 self.cursor += 1
 
@@ -75,15 +69,18 @@ class Sequencer(object):
         self.server.stop()
         print('OSC Sequencer: terminated')
 
-
-
     def exit(self, *args):
         """
         Handle process termination gracefully (stop the main loop)
         """
         self.exiting = True
 
-    @make_method('/Play', None)
+
+    """
+    Transport
+    """
+
+    @API('/Play')
     def play(self):
         """
         Make the sequencer play and read enabled sequnces
@@ -96,7 +93,7 @@ class Sequencer(object):
         self.cursor = 0
         self.timer.reset()
 
-    @make_method('/Resume', None)
+    @API('/Resume')
     def resume(self):
         """
         Make the sequencer play from where is stopped
@@ -108,14 +105,14 @@ class Sequencer(object):
         self.is_playing = 1
         self.timer.reset()
 
-    @make_method('/Stop', None)
+    @API('/Stop')
     def stop(self):
         """
         Stop the sequencer
         """
         self.is_playing = 0
 
-    @make_method('/Trigger', None)
+    @API('/Trigger')
     def trig(self):
         """
         Reset the sequencer's cursor on next beat : sequences restart from beginning
@@ -126,93 +123,61 @@ class Sequencer(object):
         self.timer.trig()
         self.cursor = 0
 
-    @make_method('/Bpm', 'i')
-    def set_bpm(self, path, args):
+    @API('/Bpm')
+    def set_bpm(self, bpm):
         """
         Set the sequencer's bpm
         """
-        self.bpm = args[0]
+        self.bpm = int(bpm)
 
-    @make_method('/Sequence/Toggle', 'si')
-    def toggle_sequence(self, path, args):
+    """
+    Sequences
+    """
+
+    @API('/Sequence/Toggle', 'si')
+    def sequence_toggle(self, name, state):
         """
         Toggle a sequence's state
         """
-        self.sequences[args[0]].toggle(args[1])
+        self.sequences[name].toggle(state)
 
-    @make_method('/Sequence/Enable', 's')
-    def enable_sequence(self, path, args):
+    @API('/Sequence/Enable', 's')
+    def sequence_enable(self, name):
         """
         Enable a sequence
         """
-        self.sequences[args[0]].toggle(1)
+        self.sequences[name].toggle(1)
 
-    @make_method('/Sequence/Disable', 's')
-    def disable_sequence(self, path, args):
+    @API('/Sequence/Disable', 's')
+    def sequence_disable(self, name):
         """
         Disable a sequence
         """
-        self.sequences[args[0]].toggle(0)
+        if name == '*':
 
-    @make_method('/DisableAll', None)
-    def disable_all(self, path, args):
-        """
-        Stop all sequences and scenes
-        """
-        for s in self.sequences:
-            self.sequences[s].toggle(0)
-        for s in self.scenes:
-            self.stop_scene(False, [s])
+            self.sequence_disable_all()
 
-    @make_method('/Scene/Play', 's')
-    def play_scene(self, path, args):
+        elif self.sequences.has_key(name):
+
+            self.sequences[name].toggle(0)
+
+    def sequence_disable_all(self):
         """
-        Start a scene (restart it if its already playing)
+        Stop all sequences
         """
 
-        if args[0] in self.scenes:
-            self.stop_scene(False, [args[0]])
-            del self.scenes[args[0]]
+        for name in self.sequences:
+            self.sequences[name].toggle(0)
 
-        if hasattr(self.scenes_list, args[0]):
-            self.scenes[args[0]] = Process(target=self.scenes_list.__dict__[args[0]], args=[self, Timer(self)])
-            self.scenes[args[0]].start()
-
-
-    @make_method('/Scene/Stop', 's')
-    def stop_scene(self, path, args):
-        """
-        Stop a scene
-        """
-
-        if self.scenes[args[0]].pid in self.scenes_subprocesses:
-            pids = self.scenes_subprocesses[self.scenes[args[0]].pid]
-            for pid in pids:
-                try:
-                    kill(pid, SIGKILL)
-                except:
-                    pass
-            del self.scenes_subprocesses[self.scenes[args[0]].pid]
-
-        self.scenes[args[0]].terminate()
-        self.scenes[args[0]].join()
-
-    @make_method('/Debug', None)
-    def log(self, path, args):
-        """
-        Log something in the console
-        """
-
-        print('[debug] Sequencer says: ' + str(args))
-
-    def addSequence(self, name, steps):
+    def sequence_add(self, name, steps):
         """
         Add a sequence
         """
 
         self.sequences[name] = Sequence(self, name, steps)
 
-    def addRandomSequence(self, name, steps, n_steps):
+
+    def sequence_add_random(self, name, steps, n_steps):
         """
         Add a randomized sequence with NON-REPEATING steps
         """
@@ -234,32 +199,77 @@ class Sequencer(object):
 
         self.sequences[name] = self.sequence(self, name, stepsR)
 
-    def playStep(self, args):
+    def sequence_play_step(self, name, cursor):
         """
         Parse a Sequence's step
         """
-        if not args:
+
+        step = self.sequences[name].getStep(cursor)
+
+        if not step:
             return
 
-        if type(args[0]) is list:
-            for i in range(len(args)):
-                self.send(*args[i])
+        if type(step[0]) is list:
+            for i in range(len(step)):
+                self.send(*step[i])
         else:
-            self.send(*args)
+            self.send(*step)
 
-    def send(self, path, *args):
+
+    """
+    Scenes
+    """
+
+    @API('/Scene/Play', 's')
+    def scene_play(self, name):
         """
-        Send osc messages
+        Start a scene (restart it if its already playing)
         """
 
-        if path[0] == ':':
-            self.server.send('osc.udp://localhost:' + str(self.port), path[1:], *args)
+        if name in self.scenes:
+            self.scene_stop(name)
+            del self.scenes[name]
 
-        else:
-            for i in range(len(self.target)):
-                self.server.send('osc.udp://' + self.target[i], path, *args)
+        if hasattr(self.scenes_list, name):
+            self.scenes[name] = Process(target=self.scenes_list.__dict__[name], args=[self, Timer(self)])
+            self.scenes[name].start()
 
-    def registerSceneSubprocess(self, target, args):
+
+    @API('/Scene/Stop', 's')
+    def scene_stop(self, name):
+        """
+        Stop a scene
+        """
+
+        if name == '*':
+            return self.scene_stop_all()
+
+        if self.scenes[name].pid in self.scenes_subprocesses:
+            pids = self.scenes_subprocesses[self.scenes[name].pid]
+            for pid in pids:
+                try:
+                    kill(pid, SIGKILL)
+                except:
+                    pass
+            del self.scenes_subprocesses[self.scenes[name].pid]
+
+
+        try:
+            kill(self.scenes[name].pid, SIGKILL)
+        except:
+            pass
+
+        self.scenes[name].terminate()
+        self.scenes[name].join(0)
+
+    def scene_stop_all(self):
+        """
+        Stop all scenes
+        """
+        for name in self.scenes:
+            self.scene_stop(name)
+
+    def scene_run_subprocess(self, target, args):
         """
         Register threaded functions (animate, repeat) to stop them when stopping the scene
         """
@@ -280,13 +290,51 @@ class Sequencer(object):
 
         self.scenes_subprocesses[parentPid] = proxy
 
+    """
+    Misc
+    """
+
+    @API('/Log')
+    def log(self, *message):
+        """
+        Log something in the console
+        """
+
+        print('[debug] Sequencer says: ' + str(message))
+
+    @API('/DisableAll')
+    def disable_all(self):
+        self.sequence_disable_all()
+        self.scene_stop_all()
+
+    """
+    OSC
+    """
+
+    def send(self, address, *args):
+        """
+        Send osc messages
+        """
+
+        if address[0] == ':':
+            self.server.send('osc.udp://localhost:' + str(self.port), address[1:], *args)
+
+        else:
+            for i in range(len(self.target)):
+                self.server.send('osc.udp://' + self.target[i], address, *args)
+
+
+
+    """
+    Utils
+    """
 
     def animate(self, args, start, end, duration, framerate=10, mode='float'):
         """
         Animate function for pyOSCseq's osc sending method :
         Execute the given function for different values of its last argument,
         computed between 'start' and 'end'.
-        - args : osc path string or tuple containing the first arguments passed to the function (these won't be animated)
+        - args : osc address string or tuple containing the first arguments passed to the function (these won't be animated)
         - duration (s) : time to complete the animation
         - framerate (hz) : frames per seconds
         - mode ('float'|'integer'): send floats or integers
@@ -321,7 +369,7 @@ class Sequencer(object):
                 if frame != n_frames:
                     timer.wait(framelength, 'seconds')
 
-        self.registerSceneSubprocess(threaded, [args, start, end, duration, framerate, mode])
+        self.scene_run_subprocess(threaded, [args, start, end, duration, framerate, mode])
 
     def repeat(self, args, nb_repeat, interval):
         """
@@ -333,77 +381,7 @@ class Sequencer(object):
             timer = Timer(self)
 
             for i in range(nb_repeat):
-                begin = time()
                 self.send(*args)
                 timer.wait(interval, 'seconds')
 
-        self.registerSceneSubprocess(threaded, [args, nb_repeat, interval, function])
-
-    def beatsToSeconds(self, beats):
-        """Convert beats to seconds)"""
-        return 60. / self.bpm * beats
-
-
-class Timer(object):
-    """
-    Timer with latency compensation
-    """
-
-    def __init__(self, sequencer):
-
-        self.sequencer = sequencer
-        self.trigger = 0
-        self.clock = time()
-        self.time = time()
-        self.shift = 0
-
-    def reset(self):
-
-        self.clock = time()
-        self.time = time()
-        self.shift = 0
-
-    def trig(self):
-
-        self.trigger = 1
-        self.reset()
-
-    def wait(self, n, mode='beats'):
-
-        if mode[0] == 'b':
-            delay = self.sequencer.beatsToSeconds(n)
-        elif mode[0] == 's':
-            delay = n
-
-        while time() - self.clock < delay and not self.trigger and not self.sequencer.exiting:
-            sleep(0.001)
-
-        if self.trigger:
-            self.trigger = 0
-        else:
-            t = time()
-            self.shift += delay - (t - self.time)
-            self.clock += self.shift + delay
-            self.time = t
-
-class Sequence(object):
-    """
-    Sequence: event loop synchronized by the sequencer's tempo
-    """
-    def __init__(self, parent=None, name=None, steps=None):
-
-        self.name = name
-        self.steps = steps
-        self.beats = len(self.steps)
-        self.is_playing = False
-
-    def getStep(self, cursor):
-
-        if not self.is_playing:
-            return None
-
-        return self.steps[cursor%self.beats]
-
-    def toggle(self, x):
-
-        self.is_playing = bool(x)
+        self.scene_run_subprocess(threaded, [args, nb_repeat, interval, function])
