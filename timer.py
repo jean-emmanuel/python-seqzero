@@ -12,14 +12,10 @@ class Timer(object):
         self.sequencer = sequencer
         self.trigger = 0
         self.clock = time()
-        self.time = time()
-        self.shift = 0
 
     def reset(self):
 
         self.clock = time()
-        self.time = time()
-        self.shift = 0
 
     def trig(self):
 
@@ -39,7 +35,4 @@ class Timer(object):
         if self.trigger:
             self.trigger = 0
         else:
-            t = time()
-            self.shift += delay - (t - self.time)
-            self.clock += self.shift + delay
-            self.time = t
+            self.clock += delay
