@@ -10,6 +10,8 @@ from multiprocessing import Manager, Process, current_process
 from os import kill
 from signal import signal, SIGINT, SIGTERM, SIGKILL
 
+from threading import Thread
+
 class Sequencer(object):
     """
     OSC Sequencer
@@ -27,6 +29,8 @@ class Sequencer(object):
         self.scenes = {}
         self.scenes_list = scenes
         self.scenes_subprocesses = Manager().dict() # this will be shared accross processes
+
+        self.thread = None
 
         self.server = Server(port=self.port, namespace=name)
         self.server.register_methods(self)
@@ -66,6 +70,14 @@ class Sequencer(object):
 
         print('OSC Sequencer: terminated')
 
+    def start_threaded(self):
+        """
+        Start the sequencer's main loop without blocking the thread
+        /!\ exit() must be called to stop it (ctrl+c alone won't work)
+        """
+        self.thread = Thread(target=self.start)
+        self.thread.start()
+
     def exit(self, *args):
         """
         Handle process termination gracefully (stop the main loop)
@@ -73,6 +85,9 @@ class Sequencer(object):
         self.exiting = True
         self.disable_all()
         self.server.stop()
+
+        if self.thread is not None:
+            self.thread.join(0.0)
 
 
     """
