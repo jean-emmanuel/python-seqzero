@@ -288,7 +288,7 @@ class Sequencer(object):
             pass
 
         self.scenes[name].terminate()
-        self.scenes[name].join(0)
+        self.scenes[name].join(0.0)
 
     def scene_stop_all(self):
         """
