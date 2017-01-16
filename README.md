@@ -39,18 +39,4 @@ See [examples](examples/) (more docs to come...)
 
 ## OSC API
 
-```
-OSC address                   expected args         explanation
-===============================================================
-/Sequencer/Play               None
-/Sequencer/Stop               None
-/Sequencer/Trigger            None
-/Sequencer/Bpm                integer
-/Sequencer/Sequence/Toggle    string integer        [sequence's name, 0/1 to disable/enable ]
-/Sequencer/Sequence/Enable    string                sequence's name
-/Sequencer/Sequence/Disable   string                sequence's name
-/Sequencer/DisableAll         None
-/Sequencer/Scene/Play         string                scene's name
-/Sequencer/Scene/Stop         string                scene's name
-/Sequencer/Debug              None
-```
+See [API.md](API.md)

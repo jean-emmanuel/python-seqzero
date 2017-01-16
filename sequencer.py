@@ -303,6 +303,9 @@ class Sequencer(object):
 
     @API('/DisableAll')
     def disable_all(self):
+        """
+        Disable all sequences and stop all scenes
+        """
         self.sequence_disable_all()
         self.scene_stop_all()
 
