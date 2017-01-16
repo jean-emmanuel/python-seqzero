@@ -37,7 +37,7 @@ class Sequencer(object):
         # Sequences & Scenes
         self.sequences = {}
         self.scenes = {}
-        self.scenes_list = scenes
+        self.scenes_list = scenes if scenes is not None else {}
         self.scenes_subprocesses = Manager().dict() # this will be shared accross processes
 
         # OSC
