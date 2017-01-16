@@ -10,7 +10,7 @@ class Timer(object):
     def __init__(self, sequencer):
 
         self.sequencer = sequencer
-        self.rate = 1 / 1000
+        self.rate = 1 / 1000.0
         self.trigger = 0
         self.clock = time()
 
