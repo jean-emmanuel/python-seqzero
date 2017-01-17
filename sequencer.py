@@ -39,7 +39,6 @@ class Sequencer(object):
         self.sequences = {}
         self.scenes = {}
         self.scenes_list = scenes if scenes is not None else {}
-        self.scenes_subprocesses = Manager().dict() # this will be shared accross processes
 
         # OSC
         self.port = port
@@ -305,16 +304,6 @@ class Sequencer(object):
         if name == '*':
             return self.scene_stop_all()
 
-        if self.scenes[name].pid in self.scenes_subprocesses:
-            pids = self.scenes_subprocesses[self.scenes[name].pid]
-            for pid in pids:
-                try:
-                    kill(pid, SIGKILL)
-                except:
-                    pass
-            del self.scenes_subprocesses[self.scenes[name].pid]
-
-
         try:
             kill(self.scenes[name].pid, SIGKILL)
         except:
@@ -330,30 +319,24 @@ class Sequencer(object):
         for name in self.scenes:
             self.scene_stop(name)
 
-    def scene_run_subprocess(self, target, args):
+    def scene_run_subscene(self, subscene, args, blocking=False):
         """
+        Run a function in its own thread ()
         Register threaded functions (animate, repeat) to stop them when stopping the scene
 
         Args:
-            target (function): function to run in a new process
-            args       (list): arguments passed to the function
+            subscene (function): function to run in a new process
+            args         (list): arguments passed to the function
+            blocking     (bool): False = threaded, non-blocking
+                                 True  = blocking
         """
 
-        process = Process(target=target, args=args)
-        process.start()
-
-        parentPid = current_process().pid
-
-        # we need (need) to do this trick
-        # using a proxy variable before modifying self.scenes_subprocesses
-        # ensures that the Manager sees the change and sync the object accross processes
-
-        proxy = []
-        if parentPid in self.scenes_subprocesses:
-            proxy = self.scenes_subprocesses[parentPid]
-        proxy.append(process.pid)
-
-        self.scenes_subprocesses[parentPid] = proxy
+        if not blocking:
+            process = Thread(target=subscene, args=args)
+            process.start()
+            process.join()
+        else:
+            subscene(*args)
 
     """
     Misc
@@ -404,7 +387,7 @@ class Sequencer(object):
     Utils
     """
 
-    def animate(self, args, start, end, duration, framerate=10, mode='float'):
+    def animate(self, args, start, end, duration, framerate=10, mode='float', blocking=False):
         """
         Animate function for pyOSCseq's osc sending method :
         Execute the given function for different values of its last argument,
@@ -419,8 +402,11 @@ class Sequencer(object):
                 default is linear: it returns (end - start) / n_frames * frame + start
                 frame: current frame number
                 n_frames: total number of frames
+
+            blocking   (bool): False = threaded, non-blocking
+                               True  = blocking
         """
-        def threaded(args, start, end, duration, framerate=10, mode='float', easing=None):
+        def subscene(args, start, end, duration, framerate, mode, easing=None):
 
             timer = Timer(self)
 
@@ -446,9 +432,9 @@ class Sequencer(object):
                 if frame != n_frames:
                     timer.wait(framelength, 'seconds')
 
-        self.scene_run_subprocess(threaded, [args, start, end, duration, framerate, mode])
+        self.scene_run_subscene(subscene, [args, start, end, duration, framerate, mode], blocking=False)
 
-    def repeat(self, args, nb_repeat, interval):
+    def repeat(self, args, nb_repeat, interval, blocking=False):
         """
         Repeat function for pyOSCseq's osc sending method :
         Execute the given function nb_repeat times, and waits interval seconds between each call
@@ -457,8 +443,11 @@ class Sequencer(object):
             args      (list): osc message's address and arguments
             nb_repeat  (int): numbers of repetition
             interval (float): delay between iteration in seconds
-        """
-        def threaded(args, nb_repeat, interval):
+
+            blocking  (bool): False = threaded, non-blocking
+                              True  = blocking
+           """
+        def subscene(args, nb_repeat, interval):
 
             timer = Timer(self)
 
@@ -466,4 +455,4 @@ class Sequencer(object):
                 self.send(*args)
                 timer.wait(interval, 'seconds')
 
-        self.scene_run_subprocess(threaded, [args, nb_repeat, interval, function])
+        self.scene_run_subscene(subscene, [args, nb_repeat, interval, function], blocking=False)
