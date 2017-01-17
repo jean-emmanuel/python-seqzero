@@ -1,8 +1,15 @@
-feeds = [
-    'transport',
-    'sequences',
-    'scenes'
-]
+# encoding: utf-8
+
+"""
+OSC Feeds
+
+Args:
+    sequencer (Sequencer)
+
+Returns:
+    Useful data in a dictionnary, that will be serialized and sent to the
+    subscribers by the sequencer
+"""
 
 def transport(sequencer):
     return {

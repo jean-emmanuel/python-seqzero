@@ -44,7 +44,7 @@ class Sequencer(object):
         self.sequences = {}
         self.scenes = {}
         self.scenes_list = scenes if scenes is not None else {}
-        self.scenes_list_names = [n for n in self.scenes_list.__dict__ if n[0] != '_' and callable(self.scenes_list.__dict__[n])]
+        self.scenes_list_names = [n for n in self.scenes_list.__dict__ if n[0] != '_' and callable(self.scenes_list.__dict__[n])] if scenes is not None else []
 
         # OSC
         self.port = port
@@ -57,9 +57,9 @@ class Sequencer(object):
         self.feeds = {}
         self.feeding = False
         self.feed_history = {}
-        for name in Feeds.feeds:
+        for name, func in Feeds.__dict__.iteritems():
             self.feeds[name] = {
-                'fetch': Feeds.__dict__[name],
+                'fetch': func,
                 'subscribers': []
             }
             self.feed_history[name] = ''
