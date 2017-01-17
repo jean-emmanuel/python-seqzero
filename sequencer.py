@@ -10,6 +10,7 @@ from random import random
 from multiprocessing import Manager, Process, current_process
 from os import kill
 from signal import signal, SIGINT, SIGTERM, SIGKILL
+from inspect import getmembers
 
 from threading import Thread
 
@@ -43,14 +44,16 @@ class Sequencer(object):
         # Sequences & Scenes
         self.sequences = {}
         self.scenes = {}
-        self.scenes_list = scenes if scenes is not None else {}
-        self.scenes_list_names = [n for n in self.scenes_list.__dict__ if n[0] != '_' and callable(self.scenes_list.__dict__[n])] if scenes is not None else []
+        self.scenes_list = {}
+        for sname, scene in getmembers(scenes):
+            if callable(scene) and sname[0] != '_':
+                self.scenes_list[sname] = scene
 
         # OSC
         self.port = port
         self.target = target.split(' ') if target is not None else []
         self.server = Server(port=self.port, namespace=name)
-        self.server.register_methods(self)
+        self.server.register_api(self)
         self.server.start()
 
         # Feedback
@@ -318,8 +321,8 @@ class Sequencer(object):
         if name in self.scenes and self.scenes[name] is not None:
             self.scene_stop(name)
 
-        if hasattr(self.scenes_list, name):
-            self.scenes[name] = Process(target=self.scenes_list.__dict__[name], args=[self, Timer(self)])
+        if name in self.scenes_list:
+            self.scenes[name] = Process(target=self.scenes_list[name], args=[self, Timer(self)])
             self.scenes[name].start()
 
 
