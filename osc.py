@@ -1,53 +1,73 @@
 # encoding: utf-8
 
 from liblo import ServerThread, make_method, Address
+from inspect import getmembers
 
 class Server(ServerThread):
     """
-    OSC Server with
+    OSC Server derivated from liblo's with
     - namespace prefixed to osc methods
+    - case-insensitive osc address matching
     - sending protocol set to udp
     """
+
     def __init__(self, namespace, **kwargs):
+        """
+        Server contructor
 
-        self.namespace = namespace if namespace[0] == '/' else '/' + namespace
+        Args:
+            namespace (str): osc method addresses will be prefixed with /namespace
+                             disabled with an empty string
 
-        ServerThread.__init__(self, **kwargs)
+        """
 
-    def add_method(self, path, typespec, func, user_data=None):
+        ServerThread.__init__(self, reg_methods=False, **kwargs)
 
-        ServerThread.add_method(self, self.namespace + path, typespec, func, user_data)
+        self.namespace = namespace if namespace[0] == '/' or namespace == '' else '/' + namespace
+        self.osc_methods = {}
+        self.add_method(None, None, self.route_osc)
 
-    def send(self, target, *args):
+    def register_api(self, obj):
+        """
+        Resister all @API decorated methods found in obj
+        """
+        for name, method in getmembers(obj):
+            if hasattr(method, '_osc_address'):
+                addresses = method._osc_address
+                for address in addresses:
+                    self.osc_methods[(self.namespace + address).lower()] = method
 
-        ServerThread.send(self, 'osc.udp://' + target, *args)
+    def send(self, target, *message):
+        """
+        Send osc message over udp
+        """
 
-class API(make_method):
+        ServerThread.send(self, 'osc.udp://' + target, *message)
+
+    def route_osc(self, address, *args):
+        """
+        OSC address vs method lookup
+        """
+        address = address.lower()
+        if address in self.osc_methods:
+            self.osc_methods[address](*args[0])
+
+
+class API():
     """
-    Wrapper around liblo's make_method decorator:
-    - make types argument optionnal
-    - only pass self and arguments to the method (strip out osc address and extra infos)
-    - allow multiple decorators on a single method
+    Decorator to bind methods to OSC addresses
     """
 
-    def __init__(self, path, types=None, user_data=None):
+    def __init__(self, address, types=None):
 
-        make_method.__init__(self, path, types, user_data)
+        self.address = address
 
     def __call__(self, method):
 
-        if hasattr(method, '_method_spec'):
-            method._method_spec.append(self.spec)
-            return method
+        if hasattr(method, '_osc_address'):
+            method._osc_address.append(self.address)
+        else:
+            method._osc_address = []
+            method._osc_address.append(self.address)
 
-        def f(self, *args):
-            if len(args) >= 3 and type(args[3]) == Address:
-                method(self, *args[1])
-            else:
-                method(self, *args)
-
-        if not hasattr(f, '_method_spec'):
-            f._method_spec = []
-        f._method_spec.append(self.spec)
-
-        return f
+        return method
