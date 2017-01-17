@@ -12,6 +12,9 @@ from signal import signal, SIGINT, SIGTERM, SIGKILL
 
 from threading import Thread
 
+from json import loads as JSON_decode
+from json import dumps as JSON_encode
+
 class Sequencer(object):
     """
     OSC Sequencer
@@ -210,21 +213,27 @@ class Sequencer(object):
         for name in self.sequences:
             self.sequences[name].toggle(0)
 
+    @API('/Sequence/Add', 'ss')
     def sequence_add(self, name, steps):
         """
         Add a sequence
 
         Args:
             name   (str): sequence's name
-            steps (list): steps cas be
-                - messages (list): ['/path', arg1, arg2]
-                - list of messages to be sent at the same time
+            steps (list): a step cas be
+                - a message (list): ['/path', arg1, arg2]
+                - a list of messages to be sent at the same time
                 - False or None for empty steps
+
+        OSC:
+            steps  (str): list written as a JSON string
         """
+        if type(steps) is str and steps[0] == '[' and steps[-1] == ']':
+            steps = JSON_decode(steps)
 
         self.sequences[name] = Sequence(self, name, steps)
 
-
+    @API('/Sequence/Add/Random', 'ss')
     def sequence_add_random(self, name, steps, n_steps):
         """
         Add a randomized sequence with NON-REPEATING steps
@@ -233,7 +242,13 @@ class Sequencer(object):
             name    (str): sequence's name
             steps  (list): steps to shuffle
             n_steps (int): total number of steps
+
+        OSC:
+            steps   (str): list written as a JSON string
         """
+
+        if type(steps) is str and steps[0] == '[' and steps[-1] == ']':
+            steps = JSON_decode(steps)
 
         stepsR = []
         oldir = -1
