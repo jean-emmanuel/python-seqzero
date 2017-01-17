@@ -1,0 +1,146 @@
+# OSC API
+
+--------------------------------------------------------------------------------
+Address: /Sequencer/Play 
+Method : play()
+
+Make the sequencer play and read enabled sequnces
+
+--------------------------------------------------------------------------------
+Address: /Sequencer/Resume 
+Method : resume()
+
+Make the sequencer play from where it stopped
+
+--------------------------------------------------------------------------------
+Address: /Sequencer/Stop 
+Method : stop()
+
+Stop the sequencer
+
+--------------------------------------------------------------------------------
+Address: /Sequencer/Trigger 
+Method : trig()
+
+Reset the sequencer's cursor on next beat : sequences restart from beginning
+
+--------------------------------------------------------------------------------
+Address: /Sequencer/Bpm bpm
+Method : set_bpm(bpm)
+
+Set the sequencer's bpm
+    - bpm: integer
+
+--------------------------------------------------------------------------------
+Address: /Sequencer/Sequence/Toggle name state
+Method : sequence_toggle(name, state)
+
+Toggle a sequence's state
+
+    Args:
+        name  (str): sequence's name
+        state (int): 0 or 1
+
+--------------------------------------------------------------------------------
+Address: /Sequencer/Sequence/Enable name
+Method : sequence_enable(name)
+
+Enable a sequence
+
+    Args:
+        name  (str): sequence's name
+
+--------------------------------------------------------------------------------
+Address: /Sequencer/Sequence/Disable name
+Method : sequence_disable(name)
+
+Disable a sequence
+
+    Args:
+        name (str): sequence's name
+            set to '*' to stop all
+
+--------------------------------------------------------------------------------
+Address: /Sequencer/Sequence/Add name steps
+Method : sequence_add(name, steps)
+
+Add a sequence
+
+    Args:
+        name   (str): sequence's name
+        steps (list): a step cas be
+        - a message (list): ['/path', arg1, arg2]
+        - a list of messages to be sent at the same time
+        - False or None for empty steps
+
+    OSC:
+        steps  (str): list written as a JSON string
+
+--------------------------------------------------------------------------------
+Address: /Sequencer/Sequence/Add/Random name steps n_steps
+Method : sequence_add_random(name, steps, n_steps)
+
+Add a randomized sequence with NON-REPEATING steps
+
+    Args:
+        name    (str): sequence's name
+        steps  (list): steps to shuffle
+        n_steps (int): total number of steps
+
+    OSC:
+        steps   (str): list written as a JSON string
+
+--------------------------------------------------------------------------------
+Address: /Sequencer/Scene/Play name
+Method : scene_play(name)
+
+Start a scene (restart it if its already playing)
+
+    Args:
+        name (str): scenes's name
+
+--------------------------------------------------------------------------------
+Address: /Sequencer/Scene/Stop name
+Method : scene_stop(name)
+
+Stop a scene
+
+    Args:
+        name (str): scenes's name
+            set to '*' to stop all
+
+--------------------------------------------------------------------------------
+Address: /Sequencer/Log message
+Method : log(message)
+
+Log something in the console
+
+    Args:
+        message: anything
+
+--------------------------------------------------------------------------------
+Address: /Sequencer/DisableAll 
+Method : disable_all()
+
+Disable all sequences and stop all scenes
+
+--------------------------------------------------------------------------------
+Address: /Sequencer/Feed/Subscribe host name
+Method : feed_subscribe(host, name)
+
+Subscribe to a feed. Requested feed's updates will be sent to the host
+
+    Args:
+        host (str): ip:address
+        name (str): feed's name
+
+--------------------------------------------------------------------------------
+Address: /Sequencer/Feed/Unsubscribe host name
+Method : feed_unsubscribe(host, name)
+
+Unsubscribe to a feed. Requested feed updates will no longer be sent to the host
+
+    Args:
+        host (str): ip:address
+        name (str): feed's name
+

@@ -519,7 +519,7 @@ class Sequencer(object):
     @API('/Feed/Unsubscribe', 'ss')
     def feed_unsubscribe(self, host, name):
         """
-        Unsubscribe to a feed. Requested feed updates will no longer be sent to the host
+        Unsubscribe from a feed. Requested feed updates will no longer be sent to the host
 
         Args:
             host (str): ip:address
