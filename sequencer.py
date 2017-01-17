@@ -44,6 +44,7 @@ class Sequencer(object):
         self.sequences = {}
         self.scenes = {}
         self.scenes_list = scenes if scenes is not None else {}
+        self.scenes_list_names = [n for n in self.scenes_list.__dict__ if n[0] != '_' and callable(self.scenes_list.__dict__[n])]
 
         # OSC
         self.port = port
@@ -314,7 +315,7 @@ class Sequencer(object):
             name (str): scenes's name
         """
 
-        if name in self.scenes:
+        if name in self.scenes and self.scenes[name] is not None:
             self.scene_stop(name)
 
         if hasattr(self.scenes_list, name):
@@ -340,6 +341,8 @@ class Sequencer(object):
         except:
             self.scenes[name].terminate()
             self.scenes[name].join(0.0)
+
+        self.scenes[name] = None
 
     def scene_stop_all(self):
         """
@@ -503,8 +506,10 @@ class Sequencer(object):
 
         if name in self.feeds and host not in self.feeds[name]['subscribers']:
             self.feeds[name]['subscribers'].append(host)
-            self.server.send('osc.udp://' + host, '/' + name, self.feed_fetch(name))
 
+            data = self.feed_fetch(name)
+            self.feed_history[name] = data
+            self.server.send('osc.udp://' + host, '/' + name, data)
 
             if not self.feeding:
                 self.feeding = Thread(target=self.feed_start)
