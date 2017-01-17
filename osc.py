@@ -4,7 +4,9 @@ from liblo import ServerThread, make_method, Address
 
 class Server(ServerThread):
     """
-    OSC Server with namespace prefixed to osc methods
+    OSC Server with
+    - namespace prefixed to osc methods
+    - sending protocol set to udp
     """
     def __init__(self, namespace, **kwargs):
 
@@ -14,8 +16,11 @@ class Server(ServerThread):
 
     def add_method(self, path, typespec, func, user_data=None):
 
-        ServerThread.add_method(self, self.namespace + path, typespec, func, user_data=None)
+        ServerThread.add_method(self, self.namespace + path, typespec, func, user_data)
 
+    def send(self, target, *args):
+
+        ServerThread.send(self, 'osc.udp://' + target, *args)
 
 class API(make_method):
     """
@@ -26,6 +31,7 @@ class API(make_method):
     """
 
     def __init__(self, path, types=None, user_data=None):
+
         make_method.__init__(self, path, types, user_data)
 
     def __call__(self, method):

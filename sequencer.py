@@ -406,11 +406,11 @@ class Sequencer(object):
         """
 
         if address[0] == ':':
-            self.server.send('osc.udp://localhost:' + str(self.port), address[1:], *args)
+            self.server.send('localhost:' + str(self.port), address[1:], *args)
 
         else:
             for i in range(len(self.target)):
-                self.server.send('osc.udp://' + self.target[i], address, *args)
+                self.server.send(self.target[i], address, *args)
 
 
 
@@ -509,7 +509,7 @@ class Sequencer(object):
 
             data = self.feed_fetch(name)
             self.feed_history[name] = data
-            self.server.send('osc.udp://' + host, '/' + name, data)
+            self.server.send(host, '/' + name, data)
 
             if not self.feeding:
                 self.feeding = Thread(target=self.feed_start)
@@ -540,7 +540,7 @@ class Sequencer(object):
                     self.feed_history[name] = data
 
                     for host in self.feeds[name]['subscribers']:
-                        self.server.send('osc.udp://' + host, '/' + name, data)
+                        self.server.send(host, '/' + name, data)
 
     def feed_fetch(self, name):
 
