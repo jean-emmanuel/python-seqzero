@@ -9,15 +9,15 @@ class Sequence(object):
         self.name = name
         self.steps = steps
         self.beats = len(self.steps)
-        self.is_playing = False
+        self.playing = False
 
     def getStep(self, cursor):
 
-        if not self.is_playing:
+        if not self.playing:
             return None
 
         return self.steps[cursor%self.beats]
 
     def toggle(self, state):
 
-        self.is_playing = bool(state)
+        self.playing = bool(state)

@@ -3,6 +3,7 @@
 from osc import Server, API
 from timer import Timer
 from sequence import Sequence
+import feeds as Feeds
 
 from time import sleep
 from random import random
@@ -14,6 +15,7 @@ from threading import Thread
 
 from json import loads as JSON_decode
 from json import dumps as JSON_encode
+
 
 class Sequencer(object):
     """
@@ -36,7 +38,7 @@ class Sequencer(object):
         self.bpm = bpm
         self.timer = Timer(self)
         self.cursor = 0
-        self.is_playing = False
+        self.playing = False
 
         # Sequences & Scenes
         self.sequences = {}
@@ -49,6 +51,17 @@ class Sequencer(object):
         self.server = Server(port=self.port, namespace=name)
         self.server.register_methods(self)
         self.server.start()
+
+        # Feedback
+        self.feeds = {}
+        self.feeding = False
+        self.feed_history = {}
+        for name in Feeds.feeds:
+            self.feeds[name] = {
+                'fetch': Feeds.__dict__[name],
+                'subscribers': []
+            }
+            self.feed_history[name] = ''
 
         # Process
         self.thread = None
@@ -70,7 +83,7 @@ class Sequencer(object):
 
         while not self.exiting:
 
-            if self.is_playing:
+            if self.playing:
 
                 for name in self.sequences:
                     self.sequence_play_step(name, self.cursor)
@@ -116,12 +129,12 @@ class Sequencer(object):
         Make the sequencer play and read enabled sequnces
         """
 
-        if self.is_playing:
+        if self.playing:
              return self.trig()
 
         self.cursor = 0
         self.timer.reset()
-        self.is_playing = True
+        self.playing = True
 
     @API('/Resume')
     def resume(self):
@@ -129,10 +142,10 @@ class Sequencer(object):
         Make the sequencer play from where it stopped
         """
 
-        if not self.is_playing:
+        if not self.playing:
              return self.play()
 
-        self.is_playing = True
+        self.playing = True
         self.timer.reset()
 
     @API('/Stop')
@@ -140,7 +153,7 @@ class Sequencer(object):
         """
         Stop the sequencer
         """
-        self.is_playing = False
+        self.playing = False
 
     @API('/Trig')
     @API('/Trigger')
@@ -148,7 +161,7 @@ class Sequencer(object):
         """
         Reset the sequencer's cursor on next beat : sequences restart from beginning
         """
-        if not self.is_playing:
+        if not self.playing:
              return self.play()
 
         self.timer.trig()
@@ -328,34 +341,12 @@ class Sequencer(object):
             self.scenes[name].terminate()
             self.scenes[name].join(0.0)
 
-        del self.scenes[name]
-
-
     def scene_stop_all(self):
         """
         Stop all scenes
         """
         for name in self.scenes:
             self.scene_stop(name)
-
-    def scene_run_subscene(self, subscene, args, blocking=False):
-        """
-        Run a function in its own thread ()
-        Register threaded functions (animate, repeat) to stop them when stopping the scene
-
-        Args:
-            subscene (function): function to run in a new process
-            args         (list): arguments passed to the function
-            blocking     (bool): False = threaded, non-blocking
-                                 True  = blocking
-        """
-
-        if not blocking:
-            process = Thread(target=subscene, args=args)
-            process.start()
-            process.join()
-        else:
-            subscene(*args)
 
     """
     Misc
@@ -379,6 +370,24 @@ class Sequencer(object):
         """
         self.sequence_disable_all()
         self.scene_stop_all()
+
+    def scene_run_subscene(self, function, args=None, blocking=False):
+        """
+        Run a function in its own thread
+
+        Args:
+            function (function): function to run in a new process
+            args         (list): arguments passed to the function
+            blocking     (bool): False = threaded, non-blocking
+                                 True  = blocking
+        """
+
+        if not blocking:
+            process = Thread(target=function, args=args)
+            process.start()
+            process.join()
+        else:
+            function(*args)
 
     """
     OSC
@@ -475,3 +484,66 @@ class Sequencer(object):
                 timer.wait(interval, 'seconds')
 
         self.scene_run_subscene(subscene, [args, nb_repeat, interval, function], blocking=False)
+
+
+
+    """
+    Feedback API
+    """
+
+    @API('/Feed/Subscribe', 'ss')
+    def feed_subscribe(self, host, name):
+        """
+        Subscribe to a feed. Requested feed's updates will be sent to the host
+
+        Args:
+            host (str): ip:address
+            name (str): feed's name
+        """
+
+        if name in self.feeds and host not in self.feeds[name]['subscribers']:
+            self.feeds[name]['subscribers'].append(host)
+            self.server.send('osc.udp://' + host, '/' + name, self.feed_fetch(name))
+
+
+            if not self.feeding:
+                self.feeding = Thread(target=self.feed_start)
+                self.feeding.start()
+
+
+    @API('/Feed/Unsubscribe', 'ss')
+    def feed_unsubscribe(self, host, name):
+        """
+        Unsubscribe to a feed. Requested feed updates will no longer be sent to the host
+
+        Args:
+            host (str): ip:address
+            name (str): feed's name
+        """
+
+        if name in self.feeds and host in self.feeds[name]['subscribers']:
+            self.feeds[name]['subscribers'].remove(host)
+
+
+    def feed_send_subscribers(self):
+
+        for name in self.feeds:
+
+            if len(self.feeds[name]['subscribers']):
+                data = self.feed_fetch(name)
+                if (self.feed_history[name] != data):
+                    self.feed_history[name] = data
+
+                    for host in self.feeds[name]['subscribers']:
+                        self.server.send('osc.udp://' + host, '/' + name, data)
+
+    def feed_fetch(self, name):
+
+        return JSON_encode(self.feeds[name]['fetch'](self))
+
+    def feed_start(self):
+
+        while True:
+
+            self.feed_send_subscribers()
+            sleep(0.001)
