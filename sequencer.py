@@ -139,6 +139,7 @@ class Sequencer(object):
         """
         self.is_playing = False
 
+    @API('/Trig')
     @API('/Trigger')
     def trig(self):
         """
@@ -189,7 +190,9 @@ class Sequencer(object):
         Disable a sequence
 
         Args:
-            name  (str): sequence's name
+            name (str): sequence's name
+                        set to '*' to stop all
+
         """
         if name == '*':
 
@@ -298,6 +301,7 @@ class Sequencer(object):
 
         Args:
             name (str): scenes's name
+                        set to '*' to stop all
         """
 
         if name == '*':

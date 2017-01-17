@@ -22,12 +22,17 @@ class API(make_method):
     Wrapper around liblo's make_method decorator:
     - make types argument optionnal
     - only pass self and arguments to the method (strip out osc address and extra infos)
+    - allow multiple decorators on a single method
     """
 
     def __init__(self, path, types=None, user_data=None):
         make_method.__init__(self, path, types, user_data)
 
     def __call__(self, method):
+
+        if hasattr(method, '_method_spec'):
+            method._method_spec.append(self.spec)
+            return method
 
         def f(self, *args):
             if len(args) >= 3 and type(args[3]) == Address:
