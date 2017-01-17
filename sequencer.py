@@ -60,11 +60,12 @@ class Sequencer(object):
         self.feeds = {}
         self.feeding = False
         self.feed_history = {}
-        for name, func in Feeds.__dict__.iteritems():
-            self.feeds[name] = {
-                'fetch': func,
-                'subscribers': []
-            }
+        for name, feed in getmembers(Feeds):
+            if callable(feed) and name[0] != '_':
+                self.feeds[name] = {
+                    'fetch': feed,
+                    'subscribers': []
+                }
             self.feed_history[name] = ''
 
         # Process
