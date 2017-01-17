@@ -16,7 +16,7 @@ def parse(m):
     doc += '%s\n\n' % info
 
 
-re.sub('(@API)([^"\n]*)([^"\n]*)([^"]*)"""([^"]*)"""', parse, source, flags=re.M)
+re.sub('(@API)([^"\n]*)([^"\n]*)([^@"]*)"""([^"]*)"""', parse, source, flags=re.M)
 
 file = open('../API.md', 'w')
 file.write(doc)

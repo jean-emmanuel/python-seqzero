@@ -36,43 +36,57 @@ Set the sequencer's bpm
 Method : `sequence_toggle(name, state)`
 
 Toggle a sequence's state
-- name: string
-- state: integer (0/1)
+
+Args:
+name  (str): sequence's name
+state (int): 0 or 1
 
 ### `/Sequencer/Sequence/Enable name`
 
 Method : `sequence_enable(name)`
 
 Enable a sequence
-- name: string
+
+Args:
+name  (str): sequence's name
 
 ### `/Sequencer/Sequence/Disable name`
 
 Method : `sequence_disable(name)`
 
 Disable a sequence
-- name: string
+
+Args:
+name (str): sequence's name
+set to '*' to stop all
 
 ### `/Sequencer/Scene/Play name`
 
 Method : `scene_play(name)`
 
 Start a scene (restart it if its already playing)
-- name: string
+
+Args:
+name (str): scenes's name
 
 ### `/Sequencer/Scene/Stop name`
 
 Method : `scene_stop(name)`
 
 Stop a scene
-- name: string
+
+Args:
+name (str): scenes's name
+set to '*' to stop all
 
 ### `/Sequencer/Log message`
 
 Method : `log(message)`
 
 Log something in the console
-- message: anything
+
+Args:
+message: anything
 
 ### `/Sequencer/DisableAll `
 
