@@ -6,7 +6,6 @@ import sys
 sys.path.append("../..")
 
 from seqzero import Sequencer
-from liblo import send
 
 import scenes
 

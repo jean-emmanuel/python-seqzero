@@ -7,16 +7,16 @@ import feeds as Feeds
 
 from time import sleep
 from random import random
-from multiprocessing import Manager, Process, current_process
-from os import kill
-from signal import signal, SIGINT, SIGTERM, SIGKILL
-from inspect import getmembers
 
 from threading import Thread
+from multiprocessing import Process
+from os import kill
+from signal import signal, SIGINT, SIGTERM, SIGKILL
+
+from inspect import getmembers
 
 from json import loads as JSON_decode
 from json import dumps as JSON_encode
-
 
 class Sequencer(object):
     """

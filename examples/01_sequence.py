@@ -4,7 +4,6 @@ import sys
 sys.path.append("../..")
 
 from seqzero import Sequencer
-from liblo import send
 
 # Instanciate a sequencer listening on port 12345
 # sending osc messages to localhost on port 5555

@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from liblo import ServerThread, make_method, Address
+from liblo import ServerThread
 from inspect import getmembers
 
 class Server(ServerThread):
