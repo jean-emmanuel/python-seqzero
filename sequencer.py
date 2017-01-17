@@ -285,7 +285,6 @@ class Sequencer(object):
 
         if name in self.scenes:
             self.scene_stop(name)
-            del self.scenes[name]
 
         if hasattr(self.scenes_list, name):
             self.scenes[name] = Process(target=self.scenes_list.__dict__[name], args=[self, Timer(self)])
@@ -307,10 +306,11 @@ class Sequencer(object):
         try:
             kill(self.scenes[name].pid, SIGKILL)
         except:
-            pass
+            self.scenes[name].terminate()
+            self.scenes[name].join(0.0)
 
-        self.scenes[name].terminate()
-        self.scenes[name].join(0.0)
+        del self.scenes[name]
+
 
     def scene_stop_all(self):
         """
