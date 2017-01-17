@@ -44,8 +44,8 @@ See [examples](examples/) (more docs to come...)
 
 ## OSC API
 
-See [API](API.txt)
+See [API](API.txt) (osc addresses are case-insensitive)
 
 ## Licence
 
-GNU/GPLv3
+[GNU/GPLv3](LICENSE)
