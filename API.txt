@@ -138,7 +138,7 @@ Subscribe to a feed. Requested feed's updates will be sent to the host
 Address: /Sequencer/Feed/Unsubscribe host name
 Method : feed_unsubscribe(host, name)
 
-Unsubscribe to a feed. Requested feed updates will no longer be sent to the host
+Unsubscribe from a feed. Requested feed updates will no longer be sent to the host
 
     Args:
         host (str): ip:address
