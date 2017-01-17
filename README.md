@@ -44,7 +44,7 @@ See [examples](examples/) (more docs to come...)
 
 ## OSC API
 
-See [API.md](API.md)
+See [API](API.txt)
 
 ## Licence
 
