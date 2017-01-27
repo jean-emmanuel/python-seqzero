@@ -405,12 +405,19 @@ class Sequencer(object):
         Send osc messages
 
         Args:
+            target  (str): (optional) ip:port pair *
             address (str): osc address
             args         : anything
+
+        * if no target is set (ie the first arg is the osc address), self.target will be used
+
         """
 
         if address[0] == ':':
             self.server.send('localhost:' + str(self.port), address[1:], *args)
+
+        elif ':' in address and ':'.split(address)[1].isdigit():
+            self.server.send(address, *args)
 
         else:
             for i in range(len(self.target)):
