@@ -413,10 +413,13 @@ class Sequencer(object):
 
         """
 
+        if type(address) == int:
+            address = str(address)
+
         if address[0] == ':':
             self.server.send('localhost:' + str(self.port), address[1:], *args)
 
-        elif ':' in address and ':'.split(address)[1].isdigit():
+        elif address.isdigit() or (':' in address and ':'.split(address)[1].isdigit()):
             self.server.send(address, *args)
 
         else:

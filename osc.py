@@ -42,6 +42,9 @@ class Server(ServerThread):
         Send osc message over udp
         """
 
+        if target.isdigit():
+            target = '127.0.0.1:' + target
+
         ServerThread.send(self, 'osc.udp://' + target, *message)
 
     def route_osc(self, address, *args):
