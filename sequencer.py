@@ -432,7 +432,7 @@ class Sequencer(object):
     Utils
     """
 
-    def animate(self, args, start, end, duration, framerate=10, mode='float', blocking=False):
+    def animate(self, args, start, end, duration, dmode='seconds', framerate=10, mode='float', blocking=False):
         """
         Animate function for pyOSCseq's osc sending method :
         Execute the given function for different values of its last argument,
@@ -441,6 +441,7 @@ class Sequencer(object):
         Args:
             args   (str|list): osc address string or tuple containing the first arguments passed to the function (these won't be animated)
             duration  (float): time to complete the animation in seconds
+            dmode       (str): duration mode, 'seconds' or 'beats'
             framerate (float): frames per seconds
             mode        (str): output number format, 'float' or 'integer'
             easing (function): custom easing function taking (start, end, frame, n_frames) for arguments
@@ -451,7 +452,7 @@ class Sequencer(object):
             blocking   (bool): False = threaded, non-blocking
                                True  = blocking
         """
-        def subscene(args, start, end, duration, framerate, mode, easing=None):
+        def subscene(args, start, end, duration, dmode, framerate, mode, easing=None):
 
             timer = Timer(self)
 
@@ -475,9 +476,9 @@ class Sequencer(object):
                 self.send(*message)
 
                 if frame != n_frames:
-                    timer.wait(framelength, 'seconds')
+                    timer.wait(framelength, dmode)
 
-        self.scene_run_subscene(subscene, [args, start, end, duration, framerate, mode], blocking=False)
+        self.scene_run_subscene(subscene, [args, start, end, duration, dmode, framerate, mode], blocking=False)
 
     def repeat(self, args, nb_repeat, interval, blocking=False):
         """
