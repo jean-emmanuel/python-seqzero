@@ -30,7 +30,7 @@ class Timer(object):
         elif mode[0] == 's':
             delay = n
 
-        while time() - self.clock < delay and not self.trigger and not self.sequencer.exiting:
+        while time() - self.clock < delay - 2 * self.rate and not self.trigger and not self.sequencer.exiting:
             sleep(self.rate)
 
         if self.trigger:
