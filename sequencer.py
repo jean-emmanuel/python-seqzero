@@ -128,8 +128,8 @@ class Sequencer(object):
     Transport
     """
 
-    @API('/Play')
-    def play(self):
+    @API('/Play', True)
+    def play(self, timestamp=None):
         """
         Make the sequencer play and read enabled sequnces
         """
@@ -138,20 +138,20 @@ class Sequencer(object):
              return self.trig()
 
         self.cursor = 0
-        self.timer.reset()
+        self.timer.reset(timestamp)
         self.playing = True
 
-    @API('/Resume')
-    def resume(self):
+    @API('/Resume', True)
+    def resume(self, timestamp=None):
         """
         Make the sequencer play from where it stopped
         """
 
         if not self.playing:
-             return self.play()
+             return self.play(timestamp)
 
         self.playing = True
-        self.timer.reset()
+        self.timer.reset(timestamp)
 
     @API('/Stop')
     def stop(self):
@@ -160,16 +160,16 @@ class Sequencer(object):
         """
         self.playing = False
 
-    @API('/Trig')
-    @API('/Trigger')
-    def trig(self):
+    @API('/Trig', True)
+    @API('/Trigger', True)
+    def trig(self, timestamp=None):
         """
         Reset the sequencer's cursor on next beat : sequences restart from beginning
         """
         if not self.playing:
-             return self.play()
+             return self.play(timestamp)
 
-        self.timer.trig()
+        self.timer.trig(timestamp)
         self.cursor = 0
 
     @API('/Bpm')
@@ -184,7 +184,7 @@ class Sequencer(object):
     Sequences
     """
 
-    @API('/Sequence/Toggle', 'si')
+    @API('/Sequence/Toggle')
     def sequence_toggle(self, name, state):
         """
         Toggle a sequence's state
@@ -195,7 +195,7 @@ class Sequencer(object):
         """
         self.sequences[name].toggle(state)
 
-    @API('/Sequence/Enable', 's')
+    @API('/Sequence/Enable')
     def sequence_enable(self, name):
         """
         Enable a sequence
@@ -205,7 +205,7 @@ class Sequencer(object):
         """
         self.sequences[name].toggle(1)
 
-    @API('/Sequence/Disable', 's')
+    @API('/Sequence/Disable')
     def sequence_disable(self, name):
         """
         Disable a sequence
@@ -231,7 +231,7 @@ class Sequencer(object):
         for name in self.sequences:
             self.sequences[name].toggle(0)
 
-    @API('/Sequence/Add', 'ss')
+    @API('/Sequence/Add')
     def sequence_add(self, name, steps):
         """
         Add a sequence
@@ -251,7 +251,7 @@ class Sequencer(object):
 
         self.sequences[name] = Sequence(self, name, steps)
 
-    @API('/Sequence/Add/Random', 'ss')
+    @API('/Sequence/Add/Random')
     def sequence_add_random(self, name, steps, n_steps):
         """
         Add a randomized sequence with NON-REPEATING steps
@@ -310,8 +310,8 @@ class Sequencer(object):
     Scenes
     """
 
-    @API('/Scene/Play', 's')
-    def scene_play(self, name):
+    @API('/Scene/Play', True)
+    def scene_play(self, name, timestamp=None):
         """
         Start a scene (restart it if its already playing)
 
@@ -323,7 +323,7 @@ class Sequencer(object):
             self.scene_stop(name)
 
         if name in self.scenes_list:
-            self.scenes[name] = Process(target=self.scenes_list[name], args=[self, Timer(self)])
+            self.scenes[name] = Process(target=self.scenes_list[name], args=[self, Timer(self, timestamp)])
             self.scenes[name].start()
 
 
@@ -509,7 +509,7 @@ class Sequencer(object):
     Feedback API
     """
 
-    @API('/Feed/Subscribe', 'ss')
+    @API('/Feed/Subscribe')
     def feed_subscribe(self, host, name):
         """
         Subscribe to a feed. Requested feed's updates will be sent to the host
@@ -531,7 +531,7 @@ class Sequencer(object):
                 self.feeding.start()
 
 
-    @API('/Feed/Unsubscribe', 'ss')
+    @API('/Feed/Unsubscribe')
     def feed_unsubscribe(self, host, name):
         """
         Unsubscribe from a feed. Requested feed updates will no longer be sent to the host

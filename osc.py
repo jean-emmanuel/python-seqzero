@@ -2,6 +2,7 @@
 
 from liblo import ServerThread
 from inspect import getmembers
+from time import time, sleep
 
 class Server(ServerThread):
     """
@@ -9,6 +10,7 @@ class Server(ServerThread):
     - namespace prefixed to osc methods
     - case-insensitive osc address matching
     - sending protocol set to udp
+    - optional timestamp argument for methods
     """
 
     def __init__(self, namespace, **kwargs):
@@ -31,9 +33,12 @@ class Server(ServerThread):
         """
         Resister all @API decorated methods found in obj
         """
+
         for name, method in getmembers(obj):
+
             if hasattr(method, '_osc_address'):
                 addresses = method._osc_address
+
                 for address in addresses:
                     self.osc_methods[(self.namespace + address).lower()] = method
 
@@ -51,9 +56,25 @@ class Server(ServerThread):
         """
         OSC address vs method lookup
         """
+
         address = address.lower()
+
         if address in self.osc_methods:
-            self.osc_methods[address](*args[0])
+            arguments = args[0]
+
+            if self.osc_methods[address]._takes_timestamp:
+
+                if len(arguments) and 't:' in arguments[-1] and arguments[-1].index('t:') == 0:
+                    timestamp = float(arguments[-1][2:])
+                    arguments = arguments[0:-1]
+                else:
+                    timestamp = time()
+
+                self.osc_methods[address](*arguments, timestamp=timestamp)
+
+            else:
+
+                self.osc_methods[address](*arguments)
 
 
 class API():
@@ -61,9 +82,10 @@ class API():
     Decorator to bind methods to OSC addresses
     """
 
-    def __init__(self, address, types=None):
+    def __init__(self, address, timestamp=False):
 
         self.address = address
+        self.timestamp = timestamp
 
     def __call__(self, method):
 
@@ -72,5 +94,7 @@ class API():
         else:
             method._osc_address = []
             method._osc_address.append(self.address)
+
+        method._takes_timestamp = self.timestamp
 
         return method
