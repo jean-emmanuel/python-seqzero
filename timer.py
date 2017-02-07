@@ -12,7 +12,7 @@ class Timer(object):
         self.sequencer = sequencer
         self.rate = 1 / 1000.0
         self.trigger = 0
-        self.clock = time() if timestamp == None else timestamp
+        self.reset(timestamp)
 
     def reset(self, timestamp=None):
 
