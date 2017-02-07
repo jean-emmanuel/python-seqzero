@@ -132,6 +132,15 @@ class Sequencer(object):
     def play(self, timestamp=None):
         """
         Make the sequencer play and read enabled sequnces
+
+        Args:
+            timestamp (str): (optional) python time() reference
+
+        OSC:
+            timestamp (str): must be formated as follow: 't:%f' where %f = time()
+                             passing this ensures the time reference is set to the sending time
+                             this will only work if the time function is consistent accross sender and receiver
+
         """
 
         if self.playing:
@@ -145,6 +154,15 @@ class Sequencer(object):
     def resume(self, timestamp=None):
         """
         Make the sequencer play from where it stopped
+
+        Args:
+            timestamp (str): (optional) python time() reference
+
+        OSC:
+            timestamp (str): must be formated as follow: 't:%f' where %f = time()
+                             passing this ensures the time reference is set to the sending time
+                             this will only work if the time function is consistent accross sender and receiver
+
         """
 
         if not self.playing:
@@ -165,6 +183,14 @@ class Sequencer(object):
     def trig(self, timestamp=None):
         """
         Reset the sequencer's cursor on next beat : sequences restart from beginning
+
+        Args:
+            timestamp (str): (optional) python time() reference
+
+        OSC:
+            timestamp (str): must be formated as follow: 't:%f' where %f = time()
+                             passing this ensures the time reference is set to the sending time
+                             this will only work if the time function is consistent accross sender and receiver
         """
         if not self.playing:
              return self.play(timestamp)
@@ -316,7 +342,14 @@ class Sequencer(object):
         Start a scene (restart it if its already playing)
 
         Args:
-            name (str): scenes's name
+            name      (str): scenes's name
+            timestamp (str): (optional) python time() reference
+
+        OSC:
+            timestamp (str): must be formated as follow: 't:%f' where %f = time()
+                             passing this ensures the time reference is set to the sending time
+                             this will only work if the time function is consistent accross sender and receiver
+
         """
 
         if name in self.scenes and self.scenes[name] is not None:
