@@ -55,6 +55,7 @@ class Server(ServerThread):
     def route_osc(self, address, *args):
         """
         OSC address vs method lookup
+        Parse or generate the timestamp if the method takes one
         """
 
         address = address.lower()
@@ -79,7 +80,7 @@ class Server(ServerThread):
 
 class API():
     """
-    Decorator to bind methods to OSC addresses
+    Decorator to bind methods to OSC addresses and tell if they handle timestamps
     """
 
     def __init__(self, address, timestamp=False):
