@@ -7,21 +7,21 @@ class Timer(object):
     Timer with latency compensation
     """
 
-    def __init__(self, sequencer):
+    def __init__(self, sequencer, timestamp=None):
 
         self.sequencer = sequencer
         self.rate = 1 / 1000.0
         self.trigger = 0
-        self.clock = time()
+        self.clock = time() if timestamp == None else timestamp
 
-    def reset(self):
+    def reset(self, timestamp=None):
 
-        self.clock = time()
+        self.clock = time() if timestamp == None else timestamp
 
-    def trig(self):
+    def trig(self, timestamp=None):
 
         self.trigger = 1
-        self.reset()
+        self.reset(timestamp)
 
     def wait(self, n, mode='beats'):
 
