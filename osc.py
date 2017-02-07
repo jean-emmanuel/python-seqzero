@@ -65,7 +65,7 @@ class Server(ServerThread):
 
             if self.osc_methods[address]._takes_timestamp:
 
-                if len(arguments) and 't:' in arguments[-1] and arguments[-1].index('t:') == 0:
+                if len(arguments) and type(arguments[-1]) == str and 't:' in arguments[-1] and arguments[-1].index('t:') == 0:
                     timestamp = float(arguments[-1][2:])
                     arguments = arguments[0:-1]
                 else:
