@@ -380,7 +380,7 @@ class Sequencer(object):
             pass
 
 
-        if self.scenes[name] is not None and self.scenes[name].pid in self.scenes_subprocesses:
+        if self.scenes.has_key(name) ans self.scenes[name] is not None and self.scenes[name].pid in self.scenes_subprocesses:
             pids = self.scenes_subprocesses[self.scenes[name].pid]
 
             for pid in pids:
