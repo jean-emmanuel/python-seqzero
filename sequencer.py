@@ -312,7 +312,7 @@ class Sequencer(object):
 
         self.sequences[name] = self.sequence(self, name, stepsR)
 
-    def sequence_play_step(self, name, cursor):
+    def sequence_play_step(self, name, cursor, substep=None):
         """
         Parse a Sequence's step
 
@@ -321,9 +321,17 @@ class Sequencer(object):
             cursor (int): sequencer's transport position
         """
 
-        step = self.sequences[name].getStep(cursor)
+        step = self.sequences[name].getStep(cursor) if substep is None else substep
 
         if not step:
+            return
+
+        if type(step) is tuple:
+            for i in range(len(step)):
+                self.sequence_play_step(None,None,step[i])
+                if i < len(step):
+                    sleep(60./(len(step)*self.bpm))
+
             return
 
         if type(step[0]) is list:
