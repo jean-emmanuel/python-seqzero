@@ -50,7 +50,10 @@ class Server(ServerThread):
         if target.isdigit():
             target = '127.0.0.1:' + target
 
-        ServerThread.send(self, 'osc.udp://' + target, *message)
+        if 'osc.udp://' not in target:
+            target = 'osc.udp://' + target
+
+        ServerThread.send(self, target, *message)
 
     def route_osc(self, address, *args):
         """
