@@ -6,3 +6,4 @@ def a(sequencer, timer):
 
 def b(sequencer, timer):
     sequencer.animate('/scenes/b', start=1, end=10, duration=1)
+    sequencer.animate('/scenes/c', start=1, end=10, duration=1)

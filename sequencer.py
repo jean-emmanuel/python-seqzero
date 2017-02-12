@@ -9,7 +9,7 @@ from time import sleep
 from random import random
 
 from threading import Thread
-from multiprocessing import Process
+from multiprocessing import Process, Manager, current_process
 from os import kill
 from signal import signal, SIGINT, SIGTERM, SIGKILL
 
@@ -48,6 +48,7 @@ class Sequencer(object):
         for sname, scene in getmembers(scenes):
             if callable(scene) and sname[0] != '_':
                 self.scenes_list[sname] = scene
+        self.scenes_subprocesses = Manager().dict()
 
         # OSC
         self.port = port
@@ -360,7 +361,7 @@ class Sequencer(object):
             self.scenes[name].start()
 
 
-    @API('/Scene/Stop', 's')
+    @API('/Scene/Stop')
     def scene_stop(self, name):
         """
         Stop a scene
@@ -376,8 +377,19 @@ class Sequencer(object):
         try:
             kill(self.scenes[name].pid, SIGKILL)
         except:
-            self.scenes[name].terminate()
-            self.scenes[name].join(0.0)
+            pass
+
+
+        if self.scenes[name] is not None and self.scenes[name].pid in self.scenes_subprocesses:
+            pids = self.scenes_subprocesses[self.scenes[name].pid]
+
+            for pid in pids:
+                try:
+                    kill(pid, SIGKILL)
+                except:
+                    pass
+
+            del self.scenes_subprocesses[self.scenes[name].pid]
 
         self.scenes[name] = None
 
@@ -423,11 +435,20 @@ class Sequencer(object):
         """
 
         if not blocking:
-            process = Thread(target=function, args=args)
+            process = Process(target=function, args=args)
             process.start()
-            process.join()
         else:
             function(*args)
+
+        parentPid = current_process().pid
+
+        proxy = []
+        if parentPid in self.scenes_subprocesses:
+            proxy= self.scenes_subprocesses[parentPid]
+        proxy.append(process.pid)
+
+        self.scenes_subprocesses[parentPid] = proxy
+
 
     """
     OSC
