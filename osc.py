@@ -53,6 +53,8 @@ class Server(ServerThread):
         if 'osc.udp://' not in target:
             target = 'osc.udp://' + target
 
+        print target
+
         ServerThread.send(self, target, *message)
 
     def route_osc(self, address, *args):
