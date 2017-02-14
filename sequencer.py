@@ -38,6 +38,7 @@ class Sequencer(object):
         # Engine
         self.bpm = bpm
         self.timer = Timer(self)
+        self.subtimer = Timer(self)
         self.cursor = 0
         self.playing = False
 
@@ -327,16 +328,20 @@ class Sequencer(object):
             return
 
         if type(step) is tuple:
-            for i in range(len(step)):
+            self.subtimer.reset()
+            n = len(step)
+
+            for i in range(n):
                 self.sequence_play_step(None,None,step[i])
-                if i < len(step):
-                    sleep(60./(len(step)*self.bpm))
+                self.subtimer.wait(1./n, 'beat')
 
             return
 
         if type(step[0]) is list:
+
             for i in range(len(step)):
                 self.send(*step[i])
+
         else:
             self.send(*step)
 
