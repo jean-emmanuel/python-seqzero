@@ -9,7 +9,7 @@ It is written in [python](https://www.youtube.com/watch?v=asUyK6JWt9U), you'll n
 ### `sequencer`
 
 - has a `bpm`
-- is *step-by-step* (everything is a quarter note)
+- is *step-by-step*
 - play/stop `sequences`
 - play/stop `scenes`
 - is controllabe via osc
@@ -22,6 +22,7 @@ It is written in [python](https://www.youtube.com/watch?v=asUyK6JWt9U), you'll n
     - `messages` written as `lists`: `['/path', arg1, arg2]`
     - `lists` of `messages` to be sent at the same time: `[['/path_1', arg1], ['/path_2', arg2]]`
     - `False` or `None` for empty steps
+    - `tuples` (`()`) of substeps that will divide the beat evenly
 
 ### `scenes`
 
