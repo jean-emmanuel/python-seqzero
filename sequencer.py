@@ -4,13 +4,13 @@ from osc import Server, API
 from timer import Timer
 from sequence import Sequence
 import feeds as Feeds
+from utils import kill
 
 from time import sleep
 from random import random
 
 from threading import Thread
 from multiprocessing import Process, Manager, current_process
-from os import kill
 from signal import signal, SIGINT, SIGTERM, SIGKILL
 
 from inspect import getmembers
@@ -387,20 +387,14 @@ class Sequencer(object):
         if name == '*':
             return self.scene_stop_all()
 
-        try:
-            kill(self.scenes[name].pid, SIGKILL)
-        except:
-            pass
+        kill(self.scenes[name].pid, self.scenes[name])
 
 
         if self.scenes.has_key(name) and self.scenes[name] is not None and self.scenes[name].pid in self.scenes_subprocesses:
             pids = self.scenes_subprocesses[self.scenes[name].pid]
 
             for pid in pids:
-                try:
-                    kill(pid, SIGKILL)
-                except:
-                    pass
+                kill(pid)
 
             del self.scenes_subprocesses[self.scenes[name].pid]
 
