@@ -387,10 +387,13 @@ class Sequencer(object):
         if name == '*':
             return self.scene_stop_all()
 
+
+        if not self.scenes.has_key(name) or self.scenes[name] is None:
+            return
+
         kill(self.scenes[name].pid, self.scenes[name])
 
-
-        if self.scenes.has_key(name) and self.scenes[name] is not None and self.scenes[name].pid in self.scenes_subprocesses:
+        if self.scenes[name].pid in self.scenes_subprocesses:
             pids = self.scenes_subprocesses[self.scenes[name].pid]
 
             for pid in pids:
