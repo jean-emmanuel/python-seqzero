@@ -9,7 +9,6 @@ from utils import kill
 from time import sleep
 from random import random
 
-from threading import Thread
 from multiprocessing import Process, Manager, current_process
 from signal import signal, SIGINT, SIGTERM, SIGKILL
 
@@ -111,7 +110,7 @@ class Sequencer(object):
         Start the sequencer's main loop without blocking the thread
         /!\ exit() must be called to stop it (ctrl+c alone won't work)
         """
-        self.thread = Thread(target=self.start)
+        self.thread = Process(target=self.start)
         self.thread.start()
 
     def exit(self, *args):
@@ -123,7 +122,7 @@ class Sequencer(object):
         self.server.stop()
 
         if self.thread is not None:
-            self.thread.join(0.0)
+            kill(self.thread.pid, self.thread)
 
 
     """
@@ -591,7 +590,7 @@ class Sequencer(object):
             self.server.send(host, '/' + name, data)
 
             if not self.feeding:
-                self.feeding = Thread(target=self.feed_start)
+                self.feeding = Process(target=self.feed_start)
                 self.feeding.start()
 
 
