@@ -1,4 +1,4 @@
-# seqzero
+# seqzero
 
 The minimalist headless osc sequencer that does the job
 
@@ -6,7 +6,7 @@ It is written in [python](https://www.youtube.com/watch?v=asUyK6JWt9U), you'll n
 
 ## Concepts
 
-### `sequencer`
+### `sequencer`
 
 - has a `bpm`
 - is *step-by-step*
@@ -15,7 +15,7 @@ It is written in [python](https://www.youtube.com/watch?v=asUyK6JWt9U), you'll n
 - is controllabe via osc
 - is *not* real-time
 
-### `sequences`
+### `sequences`
 
 - are named
 - are `lists` (`[]`) of steps, which can be
