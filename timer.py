@@ -14,6 +14,9 @@ class Timer(object):
         self.trigger = 0
         self.reset(timestamp)
 
+    def time(self):
+        return time()
+
     def reset(self, timestamp=None):
 
         self.clock = time() if timestamp == None else timestamp
