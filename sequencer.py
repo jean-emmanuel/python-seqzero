@@ -1,16 +1,15 @@
 # encoding: utf-8
 
-from osc import Server, API
-from timer import Timer
-from sequence import Sequence
-import feeds as Feeds
+from .osc import Server, API
+from .timer import Timer
+from .sequence import Sequence
+from . import feeds as Feeds
+from .utils import KillableThread as Thread
 
 from time import sleep
 from random import random
 
 from signal import signal, SIGINT, SIGTERM
-from utils import KillableThread as Thread
-from threading import current_thread
 
 from inspect import getmembers
 
@@ -243,7 +242,7 @@ class Sequencer(object):
 
             self.sequence_disable_all()
 
-        elif self.sequences.has_key(name):
+        elif name in self.sequences:
 
             self.sequences[name].toggle(0)
 
@@ -384,7 +383,7 @@ class Sequencer(object):
             return self.scene_stop_all()
 
 
-        if not self.scenes.has_key(name) or self.scenes[name] is None:
+        if not name in self.scenes or self.scenes[name] is None:
             return
 
         id = self.scenes[name].ident
@@ -443,7 +442,7 @@ class Sequencer(object):
         if not blocking:
             thread = Thread(target=function, args=args)
             thread.start()
-            id = current_thread().ident
+            id = Thread.get_current().ident
             if id not in self.scenes_subthreads:
                 self.scenes_subthreads[id] = []
             self.scenes_subthreads[id].append(thread)

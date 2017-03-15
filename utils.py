@@ -1,4 +1,4 @@
-from threading import Thread
+from threading import Thread, current_thread
 from sys import settrace
 
 class KillableThread(Thread):
@@ -33,3 +33,6 @@ class KillableThread(Thread):
 
     def kill(self):
         self.killed = True
+
+    def get_current(self):
+        return current_thread()

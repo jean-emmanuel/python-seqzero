@@ -15,7 +15,7 @@ class Scenes():
 
     def test(self, seq, timer):
 
-        print 'Network + Code latency = %f ms' % ((time() - timer.clock)*1000)
+        print('Network + Code latency = %f ms' % ((time() - timer.clock)*1000))
         timer.wait(1, 'beat')
         seq.send('127.0.0.1:12345', '/Sequencer/Scene/Play', 'test', 't:%f' % time())
 
