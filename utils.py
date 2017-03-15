@@ -2,7 +2,11 @@ from threading import Thread, current_thread
 from sys import settrace
 
 class KillableThread(Thread):
-    """A subclass of Thread, with a kill() method."""
+    """
+    A subclass of Thread, with a kill() method.
+    https://github.com/WKPlus/blog/blob/cc3e723cbed3424fa704003109f63b05139ea4bf/content/python/python%E4%B8%AD%E5%A6%82%E4%BD%95%E7%BB%88%E6%AD%A2%E4%B8%80%E4%B8%AA%E7%BA%BF%E7%A8%8B.md
+    """
+
     def __init__(self, *args, **keywords):
         Thread.__init__(self, *args, **keywords)
         self.killed = False

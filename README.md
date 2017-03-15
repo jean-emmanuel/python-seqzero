@@ -34,7 +34,7 @@ It is written in [python](https://www.youtube.com/watch?v=asUyK6JWt9U), you'll n
 
 ## Requirements
 
-- `python` 2.7+
+- `python` 2.7+ / 3
 - `python-liblo`
 
 *Tested on gnu/linux only*
