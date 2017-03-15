@@ -4,13 +4,13 @@ from osc import Server, API
 from timer import Timer
 from sequence import Sequence
 import feeds as Feeds
-from utils import kill
 
 from time import sleep
 from random import random
 
-from multiprocessing import Process, Manager, current_process
-from signal import signal, SIGINT, SIGTERM, SIGKILL
+from signal import signal, SIGINT, SIGTERM
+from utils import KillableThread as Thread
+from threading import current_thread
 
 from inspect import getmembers
 
@@ -48,7 +48,7 @@ class Sequencer(object):
         for sname, scene in getmembers(scenes):
             if callable(scene) and sname[0] != '_':
                 self.scenes_list[sname] = scene
-        self.scenes_subprocesses = Manager().dict()
+        self.scenes_subthreads = {}
 
         # OSC
         self.port = port
@@ -69,7 +69,7 @@ class Sequencer(object):
                 }
             self.feed_history[name] = ''
 
-        # Process
+        # Thread
         self.thread = None
         self.exiting = False
         signal(SIGINT, self.exit)
@@ -110,19 +110,16 @@ class Sequencer(object):
         Start the sequencer's main loop without blocking the thread
         /!\ exit() must be called to stop it (ctrl+c alone won't work)
         """
-        self.thread = Process(target=self.start)
+        self.thread = Thread(target=self.start)
         self.thread.start()
 
     def exit(self, *args):
         """
-        Handle process termination gracefully (stop the main loop)
+        Handle thread termination gracefully (stop the main loop)
         """
         self.exiting = True
         self.disable_all()
         self.server.stop()
-
-        if self.thread is not None:
-            kill(self.thread.pid, self.thread)
 
 
     """
@@ -369,7 +366,7 @@ class Sequencer(object):
             self.scene_stop(name)
 
         if name in self.scenes_list:
-            self.scenes[name] = Process(target=self.scenes_list[name], args=[self, Timer(self, timestamp)])
+            self.scenes[name] = Thread(target=self.scenes_list[name], args=[self, Timer(self, timestamp)])
             self.scenes[name].start()
 
 
@@ -390,15 +387,16 @@ class Sequencer(object):
         if not self.scenes.has_key(name) or self.scenes[name] is None:
             return
 
-        kill(self.scenes[name].pid, self.scenes[name])
+        id = self.scenes[name].ident
+        self.scenes[name].kill()
 
-        if self.scenes[name].pid in self.scenes_subprocesses:
-            pids = self.scenes_subprocesses[self.scenes[name].pid]
+        if id in self.scenes_subthreads:
 
-            for pid in pids:
-                kill(pid)
+            for subthread in self.scenes_subthreads[id]:
+                subthread.kill()
 
-            del self.scenes_subprocesses[self.scenes[name].pid]
+            del self.scenes_subthreads[id]
+
 
         self.scenes[name] = None
 
@@ -437,26 +435,20 @@ class Sequencer(object):
         Run a function in its own thread
 
         Args:
-            function (function): function to run in a new process
+            function (function): function to run in a new thread
             args         (list): arguments passed to the function
             blocking     (bool): False = threaded, non-blocking
                                  True  = blocking
         """
-
         if not blocking:
-            process = Process(target=function, args=args)
-            process.start()
+            thread = Thread(target=function, args=args)
+            thread.start()
+            id = current_thread().ident
+            if id not in self.scenes_subthreads:
+                self.scenes_subthreads[id] = []
+            self.scenes_subthreads[id].append(thread)
         else:
             function(*args)
-
-        parentPid = current_process().pid
-
-        proxy = []
-        if parentPid in self.scenes_subprocesses:
-            proxy= self.scenes_subprocesses[parentPid]
-        proxy.append(process.pid)
-
-        self.scenes_subprocesses[parentPid] = proxy
 
 
     """
@@ -495,7 +487,7 @@ class Sequencer(object):
     Utils
     """
 
-    def animate(self, args, start, end, duration, dmode='seconds', framerate=10, mode='float', blocking=False):
+    def animate(self, args, start, end, duration, dmode='seconds', framerate=10, mode='float', easing=None, timestamp=None, blocking=False):
         """
         Animate function for pyOSCseq's osc sending method :
         Execute the given function for different values of its last argument,
@@ -514,10 +506,13 @@ class Sequencer(object):
 
             blocking   (bool): False = threaded, non-blocking
                                True  = blocking
+            timestamp   (int): time reference as returned by time.time()
+                               (useful for giving the same timestamp to multiple animates
+                                to ensure they finish at the same time)
         """
-        def subscene(args, start, end, duration, dmode, framerate, mode, easing=None):
+        def subscene(args, start, end, duration, dmode, framerate, mode, easing, timestamp):
 
-            timer = Timer(self)
+            timer = Timer(self, timestamp)
 
             message = [args] if type(args) != list else args
             framelength = 1.0 / (duration * framerate)
@@ -541,11 +536,11 @@ class Sequencer(object):
                 if frame != n_frames:
                     timer.wait(framelength, dmode)
 
-        self.scene_run_subscene(subscene, [args, start, end, duration, dmode, framerate, mode], blocking=False)
+        self.scene_run_subscene(subscene, [args, start, end, duration, dmode, framerate, mode, easing, timestamp], blocking)
 
-    def repeat(self, args, nb_repeat, interval, blocking=False):
+    def repeat(self, args, nb_repeat, interval, timestamp=None, blocking=False):
         """
-        Repeat function for pyOSCseq's osc sending method :
+        Repeat function for osc sending method :
         Execute the given function nb_repeat times, and waits interval seconds between each call
 
         Args:
@@ -556,15 +551,15 @@ class Sequencer(object):
             blocking  (bool): False = threaded, non-blocking
                               True  = blocking
            """
-        def subscene(args, nb_repeat, interval):
+        def subscene(args, nb_repeat, interval, timestamp):
 
-            timer = Timer(self)
+            timer = Timer(self, timestamp)
 
             for i in range(nb_repeat):
                 self.send(*args)
                 timer.wait(interval, 'seconds')
 
-        self.scene_run_subscene(subscene, [args, nb_repeat, interval, function], blocking=False)
+        self.scene_run_subscene(subscene, [args, nb_repeat, interval, timestamp], blocking=False)
 
 
 
@@ -590,7 +585,7 @@ class Sequencer(object):
             self.server.send(host, '/' + name, data)
 
             if not self.feeding:
-                self.feeding = Process(target=self.feed_start)
+                self.feeding = Thread(target=self.feed_start)
                 self.feeding.start()
 
 
