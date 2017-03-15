@@ -38,5 +38,6 @@ class KillableThread(Thread):
     def kill(self):
         self.killed = True
 
-    def get_current(self):
+    @staticmethod
+    def get_current():
         return current_thread()
