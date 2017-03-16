@@ -115,10 +115,10 @@ class Sequencer(object):
     def exit(self, *args):
         """
         Handle thread termination gracefully (stop the main loop)
+        Don't call self.server.stop(): it dies fine on its own (calling the method can deadlock in stress situation)
         """
         self.exiting = True
         self.disable_all()
-        self.server.stop()
 
 
     """
