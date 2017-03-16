@@ -32,7 +32,7 @@ def sequences(sequencer):
 def scenes(sequencer):
     data = {}
 
-    for name in sequencer.scenes_list_names:
+    for name in sequencer.scenes_list:
         data[name] = {
             'playing': name in sequencer.scenes and sequencer.scenes[name].is_alive()
         }
