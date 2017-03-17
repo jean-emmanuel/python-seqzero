@@ -15,11 +15,11 @@ class Timer(object):
         self.reset(timestamp)
 
     def time(self):
-        return time()
+        return Timer.time()
 
     def reset(self, timestamp=None):
 
-        self.clock = time() if timestamp == None else timestamp
+        self.clock = Timer.time() if timestamp == None else timestamp
 
     def trig(self, timestamp=None):
 
@@ -33,8 +33,8 @@ class Timer(object):
         elif mode[0] == 's':
             delay = n
 
-        while time() - self.clock < delay - 2 * self.rate and not self.trigger and not self.sequencer.exiting:
-            sleep(self.rate)
+        while Timer.time() - self.clock < delay - 2 * self.rate and not self.trigger and not self.sequencer.exiting:
+            Timer.sleep(self.rate)
 
         if self.trigger:
             self.trigger = 0
