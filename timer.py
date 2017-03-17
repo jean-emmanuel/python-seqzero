@@ -1,6 +1,7 @@
 # encoding: utf-8
 
-from time import sleep, time
+from time import sleep
+from liblo import time
 
 class Timer(object):
     """

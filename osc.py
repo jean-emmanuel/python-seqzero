@@ -67,11 +67,12 @@ class Server(ServerThread):
         if address in self.osc_methods:
             method = self.osc_methods[address]
             arguments = args[0]
+            types = args[1]
 
             if method._takes_timestamp:
 
-                if len(arguments) and type(arguments[-1]) == str and arguments[-1][0:2] == 't:':
-                    timestamp = float(arguments[-1][2:])
+                if types[-1] == 't':
+                    timestamp = arguments[-1]
                 else:
                     timestamp = Timer.time()
 

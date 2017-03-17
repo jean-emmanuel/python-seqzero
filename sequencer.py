@@ -130,12 +130,12 @@ class Sequencer(object):
         Make the sequencer play and read enabled sequnces
 
         Args:
-            timestamp (str): (optional) python time() reference
+            timestamp   (float): time reference as returned by liblo.time()
 
         OSC:
-            timestamp (str): must be formated as follow: 't:%f' where %f = time()
-                             passing this ensures the time reference is set to the sending time
-                             this will only work if the time function is consistent accross sender and receiver
+            timestamp (timetag): time reference as returned by liblo.time()
+                                 passing this ensures the time reference is set to the sending time
+                                 this will only work if the time function is consistent accross sender and receiver
 
         """
 
@@ -152,12 +152,12 @@ class Sequencer(object):
         Make the sequencer play from where it stopped
 
         Args:
-            timestamp (str): (optional) python time() reference
+            timestamp   (float): time reference as returned by liblo.time()
 
         OSC:
-            timestamp (str): must be formated as follow: 't:%f' where %f = time()
-                             passing this ensures the time reference is set to the sending time
-                             this will only work if the time function is consistent accross sender and receiver
+            timestamp (timetag): time reference as returned by liblo.time()
+                                 passing this ensures the time reference is set to the sending time
+                                 this will only work if the time function is consistent accross sender and receiver
 
         """
 
@@ -181,12 +181,12 @@ class Sequencer(object):
         Reset the sequencer's cursor on next beat : sequences restart from beginning
 
         Args:
-            timestamp (str): (optional) python time() reference
+            timestamp   (float): time reference as returned by liblo.time()
 
         OSC:
-            timestamp (str): must be formated as follow: 't:%f' where %f = time()
-                             passing this ensures the time reference is set to the sending time
-                             this will only work if the time function is consistent accross sender and receiver
+            timestamp (timetag): time reference as returned by liblo.time()
+                                 passing this ensures the time reference is set to the sending time
+                                 this will only work if the time function is consistent accross sender and receiver
         """
         if not self.playing:
              return self.play(timestamp)
@@ -350,13 +350,13 @@ class Sequencer(object):
         Start a scene (restart it if its already playing)
 
         Args:
-            name      (str): scenes's name
-            timestamp (str): (optional) python time() reference
+            name          (str): scenes's name
+            timestamp   (float): time reference as returned by liblo.time()
 
         OSC:
-            timestamp (str): must be formated as follow: 't:%f' where %f = time()
-                             passing this ensures the time reference is set to the sending time
-                             this will only work if the time function is consistent accross sender and receiver
+            timestamp (timetag): time reference as returned by liblo.time()
+                                 passing this ensures the time reference is set to the sending time
+                                 this will only work if the time function is consistent accross sender and receiver
 
         """
 
@@ -471,9 +471,9 @@ class Sequencer(object):
 
         if address[0] == ':':
 
-            if type(args[-1]) != str or args[-1][0:2] != 't:':
+            if type(args[-1]) != tuple or args[-1][0] != 't':
                 args = list(args)
-                args.append('t:%f' % Timer.time())
+                args.append(('t', Timer.time()))
 
             self.server.send('localhost:' + str(self.port), address[1:], *args)
 
@@ -509,7 +509,7 @@ class Sequencer(object):
 
             blocking   (bool): False = threaded, non-blocking
                                True  = blocking
-            timestamp   (int): time reference as returned by time.time()
+            timestamp (float): time reference as returned by liblo.time()
                                (useful for giving the same timestamp to multiple animates
                                 to ensure they finish at the same time)
         """
@@ -553,6 +553,8 @@ class Sequencer(object):
 
             blocking  (bool): False = threaded, non-blocking
                               True  = blocking
+            timestamp (float): time reference as returned by liblo.time()
+
            """
         def subscene(args, nb_repeat, interval, timestamp):
 

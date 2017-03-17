@@ -5,7 +5,7 @@ sys.path.append("../..")
 
 from seqzero import Sequencer
 from liblo import ServerThread
-from time import time
+from liblo import time
 
 bpm = 2000
 
