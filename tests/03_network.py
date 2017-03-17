@@ -17,7 +17,7 @@ class Scenes():
 
         print('Network + Code latency = %f ms' % ((time() - timer.clock)*1000))
         timer.wait(1, 'beat')
-        seq.send('127.0.0.1:12345', '/Sequencer/Scene/Play', 'test', 't:%f' % time())
+        seq.send(':/Sequencer/Scene/Play', 'test', 't:%f' % time())
 
 seq = Sequencer(bpm=240, port=12345, target='localhost:9900', scenes=Scenes())
 seq.scene_play('test')

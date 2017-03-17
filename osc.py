@@ -2,7 +2,7 @@
 
 from liblo import ServerThread
 from inspect import getmembers
-from time import time, sleep
+from timer import Timer
 
 class Server(ServerThread):
     """
@@ -70,10 +70,10 @@ class Server(ServerThread):
 
             if method._takes_timestamp:
 
-                if len(arguments) and type(arguments[-1]) == str and 't:' in arguments[-1] and arguments[-1].index('t:') == 0:
+                if len(arguments) and type(arguments[-1]) == str and arguments[-1][0:2] == 't:':
                     timestamp = float(arguments[-1][2:])
                 else:
-                    timestamp = time()
+                    timestamp = Timer.time()
 
                 method(*arguments[:method._argcount-2], timestamp=timestamp)
 

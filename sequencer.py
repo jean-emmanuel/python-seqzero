@@ -6,7 +6,6 @@ from .sequence import Sequence
 from . import feeds as Feeds
 from .utils import KillableThread as Thread
 
-from time import sleep
 from random import random
 
 from signal import signal, SIGINT, SIGTERM
@@ -99,7 +98,7 @@ class Sequencer(object):
 
             else:
 
-                sleep(0.001)
+                Timer.sleep(0.001)
 
 
         print('OSC Sequencer: terminated')
@@ -471,6 +470,11 @@ class Sequencer(object):
             address = str(address)
 
         if address[0] == ':':
+
+            if type(args[-1]) != str or args[-1][0:2] != 't:':
+                args = list(args)
+                args.append('t:%f' % Timer.time())
+
             self.server.send('localhost:' + str(self.port), address[1:], *args)
 
         elif address.isdigit() or (':' in address and address.split(':')[-1].isdigit()):
@@ -623,4 +627,4 @@ class Sequencer(object):
         while True:
 
             self.feed_send_subscribers()
-            sleep(0.001)
+            Timer.sleep(0.001)

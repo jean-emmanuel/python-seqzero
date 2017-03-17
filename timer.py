@@ -40,3 +40,11 @@ class Timer(object):
             self.trigger = 0
         else:
             self.clock += delay
+
+    @staticmethod
+    def time():
+        return time()
+
+    @staticmethod
+    def sleep():
+        return sleep()
