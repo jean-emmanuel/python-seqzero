@@ -11,6 +11,7 @@ class Server(ServerThread):
     - case-insensitive osc address matching
     - sending protocol set to udp
     - optional timestamp argument for methods
+    - permissive number of argument (extra arguments are ignored, timestamp is always the last one)
     """
 
     def __init__(self, namespace, **kwargs):
@@ -64,21 +65,21 @@ class Server(ServerThread):
         address = address.lower()
 
         if address in self.osc_methods:
+            method = self.osc_methods[address]
             arguments = args[0]
 
-            if self.osc_methods[address]._takes_timestamp:
+            if method._takes_timestamp:
 
                 if len(arguments) and type(arguments[-1]) == str and 't:' in arguments[-1] and arguments[-1].index('t:') == 0:
                     timestamp = float(arguments[-1][2:])
-                    arguments = arguments[0:-1]
                 else:
                     timestamp = time()
 
-                self.osc_methods[address](*arguments, timestamp=timestamp)
+                method(*arguments[:method._argcount-2], timestamp=timestamp)
 
             else:
 
-                self.osc_methods[address](*arguments)
+                method(*arguments[:method._argcount-1])
 
 
 class API():
@@ -98,6 +99,8 @@ class API():
         else:
             method._osc_address = []
             method._osc_address.append(self.address)
+
+        method._argcount = method.func_code.co_argcount
 
         method._takes_timestamp = self.timestamp
 
