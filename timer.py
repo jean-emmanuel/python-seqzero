@@ -46,5 +46,5 @@ class Timer(object):
         return time()
 
     @staticmethod
-    def sleep():
-        return sleep()
+    def sleep(s):
+        return sleep(s)
