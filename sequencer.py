@@ -471,7 +471,7 @@ class Sequencer(object):
 
         if address[0] == ':':
 
-            if type(args[-1]) != tuple or args[-1][0] != 't':
+            if len(args) and (type(args[-1]) != tuple or args[-1][0] != 't'):
                 args = list(args)
                 args.append(('t', Timer.time()))
 

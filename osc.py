@@ -72,7 +72,7 @@ class Server(ServerThread):
 
             if method._takes_timestamp:
 
-                if types[-1] == 't':
+                if len(types) and types[-1] == 't':
                     timestamp = arguments[-1]
                 else:
                     timestamp = Timer.time()
