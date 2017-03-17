@@ -20,20 +20,23 @@ class Sequencer(object):
     OSC Sequencer
     """
 
-    def __init__(self, name='Sequencer', bpm=120, port=12345, target=None, scenes=None):
+    def __init__(self, name='Sequencer', bpm=120, port=12345, target=None, scenes=None, frequency=1000):
         """
         Sequencer contructor
 
         Args:
-            name      (str): will be prepended to all OSC API addresses
-            bpm     (float): tempo in beats per minute
-            target    (str): ip:port hosts separated by spaces
-                             (osc messages will be send to these)
-            scenes (module): imported python module containing the scenes
+            name            (str): will be prepended to all OSC API addresses
+            bpm           (float): tempo in beats per minute
+            target          (str): ip:port hosts separated by spaces
+                                   (osc messages will be send to these)
+            scenes       (module): imported python module containing the scenes
+            frequency (int|float): timer's update frequency in Hz
+                                   higher value can increase precision (and cpu load)
         """
 
         # Engine
         self.bpm = bpm
+        self.frequency = frequency
         self.timer = Timer(self)
         self.subtimer = Timer(self)
         self.cursor = 0

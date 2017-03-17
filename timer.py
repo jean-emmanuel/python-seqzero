@@ -9,9 +9,15 @@ class Timer(object):
     """
 
     def __init__(self, sequencer, timestamp=None):
+        """
+        Timer contructor
 
+        Args:
+            sequencer (Sequencer): sequencer object for retreiving frequency and bpm
+            timestamp     (float): time reference as returned by liblo.time()
+        """
         self.sequencer = sequencer
-        self.rate = 1 / 1000.0
+        self.rate = 1. / sequencer.frequency
         self.trigger = 0
         self.reset(timestamp)
 
