@@ -2,7 +2,8 @@
 
 from liblo import ServerThread
 from inspect import getmembers
-from timer import Timer
+
+from .timer import Timer
 
 class Server(ServerThread):
     """
@@ -101,7 +102,7 @@ class API():
             method._osc_address = []
             method._osc_address.append(self.address)
 
-        method._argcount = method.func_code.co_argcount
+        method._argcount = method.__code__.co_argcount
 
         method._takes_timestamp = self.timestamp
 
