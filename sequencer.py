@@ -1,3 +1,4 @@
+
 # encoding: utf-8
 
 from .osc import Server, API
@@ -93,7 +94,7 @@ class Sequencer(object):
             if self.playing:
 
                 for name in self.sequences:
-                    self.sequence_play_step(name, self.cursor)
+                    self.sequence_play_step(name, self.sequences[name].getStep(self.cursor))
 
                 self.cursor += 1
 
@@ -310,7 +311,7 @@ class Sequencer(object):
 
         self.sequences[name] = self.sequence(self, name, stepsR)
 
-    def sequence_play_step(self, name, cursor, substep=None):
+    def sequence_play_step(self, name, step):
         """
         Parse a Sequence's step
 
@@ -319,22 +320,17 @@ class Sequencer(object):
             cursor (int): sequencer's transport position
         """
 
-        step = self.sequences[name].getStep(cursor) if substep is None else substep
-
         if not step:
             return
 
         if type(step) is tuple:
-            self.subtimer.reset()
-            n = len(step)
 
-            for i in range(n):
-                self.sequence_play_step(None,None,step[i])
-                self.subtimer.wait(1./n, 'beat')
+            self.sequence_play_step(name, step[0])
+            t = Thread(target=self.sequence_play_substeps, args=[name, step, self.timer.clock])
+            t.start()
 
-            return
 
-        if type(step[0]) is list:
+        elif type(step[0]) is list:
 
             for i in range(len(step)):
                 self.send(*step[i])
@@ -342,6 +338,14 @@ class Sequencer(object):
         else:
             self.send(*step)
 
+    def sequence_play_substeps(self, name, step, clock):
+        timer = Timer(self, clock)
+        n = len(step)
+        for i in range(1, n):
+            if not self.sequences[name].playing:
+                return
+            timer.wait(1. / n, 'beat')
+            self.sequence_play_step(name, step[i])
 
     """
     Scenes
