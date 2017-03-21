@@ -94,7 +94,7 @@ class Sequencer(object):
             if self.playing:
 
                 for name in self.sequences:
-                    self.sequence_play_step(name, self.sequences[name].getStep(self.cursor))
+                    self.sequences[name].play(self.cursor)
 
                 self.cursor += 1
 
