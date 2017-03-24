@@ -26,7 +26,7 @@ class Sequence(object):
         Args:
             step:
                   (int): sequencer's transport position
-                 (list): list of messages / messages (list of args for sequencer.send())
+                 (list): list of messages / message (list of args for sequencer.send())
                 (tuple): array of substeps
 
             divider     (int): number of substeps in current context
@@ -39,9 +39,9 @@ class Sequence(object):
         step = self.steps[step%self.beats] if type(step) is int else step
 
         if type(step) is tuple:
-
-            self.play(step[0])
-            t = Thread(target=self.play_substeps, args=[step, clock if clock is not None else self.sequencer.timer.clock, divider])
+            clock if clock is not None else self.sequencer.timer.clock
+            self.play(step[0], divider, clock)
+            t = Thread(target=self.play_substeps, args=[step, divider, clock])
             t.start()
 
         elif type(step[0]) is list:
@@ -52,7 +52,7 @@ class Sequence(object):
         else:
             self.sequencer.send(*step)
 
-    def play_substeps(self, step, clock, divider):
+    def play_substeps(self, step, divider, clock):
         timer = Timer(self.sequencer, clock)
         n = len(step)
         for i in range(1, n):
