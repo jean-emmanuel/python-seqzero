@@ -19,7 +19,7 @@ It is written in [python](https://www.youtube.com/watch?v=asUyK6JWt9U), you'll n
 
 - are named
 - can be `enabled/disabled/toggled`
-- can be added via osc the fly using `JSON` notation
+- can be added via osc using `JSON` notation
 - are `lists` (`[]`) of steps, which can be
     - `messages`
     - `lists` of `messages` to be sent at the same time
