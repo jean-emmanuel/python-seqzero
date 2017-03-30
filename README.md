@@ -45,7 +45,7 @@ It is written in [python](https://www.youtube.com/watch?v=asUyK6JWt9U), you'll n
 
 The timer compensates for python's timing innaccuracy by measuring the time elasped between two calls to its `wait` method and substracting it from the 2'nd `wait`'s duration.
 
-The sequencer's timing critical methods (`/play`, `/scene/play`) support an optional extra osc timestamp argument meant for compensating the network latency, it must be a string formatted as `t:%f` where `%f` is python's `time.time()` (desired execution time).
+The sequencer's timing critical methods (`/play`, `/scene/play`) support an optional extra osc timestamp argument meant for compensating the network latency, it must be an osc timetag (osc type 't') as returned by liblo's `time()`.
 
 Long story short: seqzero may be late, but will catch up on the first occasion.
 
