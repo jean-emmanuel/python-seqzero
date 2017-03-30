@@ -39,7 +39,7 @@ class Sequence(object):
         step = self.steps[step%self.beats] if type(step) is int else step
 
         if type(step) is tuple:
-            clock if clock is not None else self.sequencer.timer.clock
+            clock = clock if clock is not None else self.sequencer.timer.clock
             self.play(step[0], divider, clock)
             t = Thread(target=self.play_substeps, args=[step, divider, clock])
             t.start()
