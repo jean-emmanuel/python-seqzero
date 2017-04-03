@@ -529,19 +529,28 @@ class Sequencer(object):
             n_frames = int(round(duration / framelength))
             coefficient = float(end - start) / n_frames
 
-            message.append(0)
+            if '$' not in message:
+                message.append('$')
 
             for frame in range(n_frames + 1):
 
                 if callable(easing):
-                    message[-1] = easing(start, end, frame, n_frames)
+                    v = easing(start, end, frame, n_frames)
                 else:
-                    message[-1] = coefficient * frame + start
+                    v = coefficient * frame + start
 
                 if mode == 'integer':
-                    message[-1] = int(message[-1])
+                    v = int(v)
 
-                self.send(*message)
+                msg = []
+
+                for i in range(len(message)):
+                    if message[i] == '$':
+                        msg.append(v)
+                    else:
+                        msg.append(message[i])
+
+                self.send(*msg)
 
                 if frame != n_frames:
                     timer.wait(framelength, dmode)
