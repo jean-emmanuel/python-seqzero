@@ -44,7 +44,7 @@ class Sequence(object):
             t = Thread(target=self.play_substeps, args=[step, divider, clock])
             t.start()
 
-        elif type(step[0]) is list:
+        elif type(step) is list and type(step[0]) is list:
 
             for i in range(len(step)):
                 self.sequencer.send(*step[i])
