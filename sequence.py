@@ -38,6 +38,9 @@ class Sequence(object):
 
         step = self.steps[step%self.beats] if type(step) is int else step
 
+        if step is None:
+            return
+
         if type(step) is tuple:
             clock = clock if clock is not None else self.sequencer.timer.clock
             self.play(step[0], divider, clock)
@@ -49,7 +52,7 @@ class Sequence(object):
             for i in range(len(step)):
                 self.sequencer.send(*step[i])
 
-        else:
+        elif type(step) is list:
             self.sequencer.send(*step)
 
     def play_substeps(self, step, divider, clock):
