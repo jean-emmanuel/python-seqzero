@@ -17,7 +17,7 @@ class Timer(object):
             timestamp     (float): time reference as returned by liblo.time()
         """
         self.sequencer = sequencer
-        self.rate = 1. / sequencer.frequency
+        self.rate = sequencer.rate
         self.trigger = 0
         self.reset(timestamp)
 

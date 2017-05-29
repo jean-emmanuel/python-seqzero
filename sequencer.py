@@ -6,8 +6,10 @@ from .timer import Timer
 from .sequence import Sequence
 from . import feeds as Feeds
 from .utils import KillableThread as Thread
+from .transport import Transport
 
 from random import random
+from math import floor
 
 from signal import signal, SIGINT, SIGTERM
 
@@ -21,7 +23,7 @@ class Sequencer(object):
     OSC Sequencer
     """
 
-    def __init__(self, name='Sequencer', bpm=120, port=12345, target=None, scenes=None, frequency=1000):
+    def __init__(self, name='Sequencer', bpm=120, port=12345, target=None, scenes=None, frequency=1000, jack_transport=False):
         """
         Sequencer contructor
 
@@ -35,9 +37,11 @@ class Sequencer(object):
                                    higher value can increase precision (and cpu load)
         """
 
+        self.name = name
+
         # Engine
         self.bpm = bpm
-        self.frequency = frequency
+        self.rate = 1. / frequency
         self.timer = Timer(self)
         self.subtimer = Timer(self)
         self.cursor = 0
@@ -77,6 +81,9 @@ class Sequencer(object):
         signal(SIGINT, self.exit)
         signal(SIGTERM, self.exit)
 
+        # Jack Transport
+        self.jack_transport = Transport(self.name, Timer(self)) if jack_transport else None
+        self.jack_repositionned = False
 
     """
     Engine
@@ -91,7 +98,40 @@ class Sequencer(object):
 
         while not self.exiting:
 
-            if self.playing:
+            if self.jack_transport and self.jack_transport.connected:
+
+                self.jack_transport.update_status()
+
+                self.playing = self.jack_transport.status['playing']
+
+                if self.jack_transport.status['bpm'] > 0.1:
+                    self.bpm = self.jack_transport.status['bpm']
+
+                jack_position = self.jack_transport.status['position']\
+                                / self.jack_transport.status['sample_rate']\
+                                * self.bpm / 60.
+
+                if self.jack_transport.status['bar'] > 0:
+                    jack_cursor = (self.jack_transport.status['bar'] -1)\
+                                  * self.jack_transport.status['beats_per_bar']\
+                                  + self.jack_transport.status['beat'] - 1
+                else:
+                    jack_cursor = floor(jack_position)
+
+                if self.jack_transport.status['repositionned']:
+                    self.jack_repositionned = jack_position == floor(jack_position)
+                    Timer.sleep(self.rate)
+                    continue
+
+                if self.playing and (jack_cursor != self.cursor or self.jack_repositionned):
+                    self.jack_repositionned = False
+                    self.timer.reset()
+                    self.cursor = int(jack_cursor)
+
+                    for name in self.sequences:
+                        self.sequences[name].play(self.cursor)
+
+            elif self.playing:
 
                 for name in self.sequences:
                     self.sequences[name].play(self.cursor)
@@ -100,9 +140,9 @@ class Sequencer(object):
 
                 self.timer.wait(1, 'beat')
 
-            else:
+                continue
 
-                Timer.sleep(0.001)
+            Timer.sleep(self.rate)
 
 
         print('OSC Sequencer: terminated')
@@ -123,6 +163,8 @@ class Sequencer(object):
         self.exiting = True
         self.disable_all()
 
+        if self.jack_transport:
+            self.jack_transport.exit()
 
     """
     Transport
@@ -146,9 +188,15 @@ class Sequencer(object):
         if self.playing:
              return self.trig()
 
-        self.cursor = 0
-        self.timer.reset(timestamp)
-        self.playing = True
+        if self.jack_transport and self.jack_transport.connected:
+            self.jack_transport.set_position(0)
+            self.jack_transport.set_playing(True)
+
+        else:
+            self.cursor = 0
+            self.timer.reset(timestamp)
+            self.playing = True
+
 
     @API('/Resume', True)
     def resume(self, timestamp=None):
@@ -165,18 +213,24 @@ class Sequencer(object):
 
         """
 
-        if not self.playing:
-             return self.play(timestamp)
+        if self.jack_transport and self.jack_transport.connected:
+            self.jack_transport.set_playing(True)
 
-        self.playing = True
-        self.timer.reset(timestamp)
+        else:
+            self.playing = True
+            self.timer.reset(timestamp)
 
     @API('/Stop')
     def stop(self):
         """
         Stop the sequencer
         """
-        self.playing = False
+
+        if self.jack_transport and self.jack_transport.connected:
+            self.jack_transport.set_playing(False)
+
+        else:
+            self.playing = False
 
     @API('/Trig', True)
     @API('/Trigger', True)
@@ -195,8 +249,12 @@ class Sequencer(object):
         if not self.playing:
              return self.play(timestamp)
 
-        self.timer.trig(timestamp)
-        self.cursor = 0
+        if self.jack_transport and self.jack_transport.connected:
+            self.jack_transport.set_position(0)
+
+        else:
+            self.timer.trig(timestamp)
+            self.cursor = 0
 
     @API('/Bpm')
     def set_bpm(self, bpm):
@@ -645,4 +703,4 @@ class Sequencer(object):
         while True:
 
             self.feed_send_subscribers()
-            Timer.sleep(0.001)
+            Timer.sleep(self.rate)
