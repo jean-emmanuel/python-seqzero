@@ -369,42 +369,6 @@ class Sequencer(object):
 
         self.sequences[name] = self.sequence(self, name, stepsR)
 
-    def sequence_play_step(self, name, step, divider=1, clock=None):
-        """
-        Parse a Sequence's step
-
-        Args:
-            name   (str): sequence's name
-            cursor (int): sequencer's transport position
-        """
-
-        if not step:
-            return
-
-        if type(step) is tuple:
-
-            self.sequence_play_step(name, step[0])
-            t = Thread(target=self.sequence_play_substeps, args=[name, step, clock if clock is not None else self.timer.clock, divider])
-            t.start()
-
-
-        elif type(step[0]) is list:
-
-            for i in range(len(step)):
-                self.send(*step[i])
-
-        else:
-            self.send(*step)
-
-    def sequence_play_substeps(self, name, step, clock, divider):
-        timer = Timer(self, clock)
-        n = len(step)
-        for i in range(1, n):
-            if not self.sequences[name].playing:
-                return
-            timer.wait(1. / n / divider, 'beat')
-            self.sequence_play_step(name, step[i], n, timer.clock)
-
     """
     Scenes
     """
