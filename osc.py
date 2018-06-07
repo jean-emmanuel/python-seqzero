@@ -27,7 +27,7 @@ class Server(ServerThread):
 
         ServerThread.__init__(self, reg_methods=False, **kwargs)
 
-        self.namespace = namespace if namespace[0] == '/' or namespace == '' else '/' + namespace
+        self.namespace = namespace if namespace == '' or namespace[0] == '/' else '/' + namespace
         self.osc_methods = {}
         self.add_method(None, None, self.route_osc)
 
