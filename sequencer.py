@@ -439,7 +439,7 @@ class Sequencer(object):
     """
 
     @API('/Log')
-    def log(self, *message):
+    def log(self, message):
         """
         Log something in the console
 
