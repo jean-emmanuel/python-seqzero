@@ -43,7 +43,7 @@ class Sequence(object):
 
         if type(step) is tuple:
             clock = clock if clock is not None else self.sequencer.timer.clock
-            self.play(step[0], divider, clock)
+            self.play(step[0], divider * len(step), clock)
             t = Thread(target=self.play_substeps, args=[step, divider, clock])
             t.start()
 
@@ -62,4 +62,4 @@ class Sequence(object):
             if not self.playing:
                 return
             timer.wait(1. / n / divider, 'beat')
-            self.play(step[i], n, timer.clock)
+            self.play(step[i], n * divider, timer.clock)
