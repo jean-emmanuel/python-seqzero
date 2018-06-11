@@ -335,6 +335,22 @@ class Sequencer(object):
 
         self.sequences[name] = Sequence(self, name, steps)
 
+    @API('/Sequence/Random')
+    def sequence_random(self, name, rand):
+        """
+        Enable random playback mode on a sequence
+
+        Args:
+            name  (str): sequence's name
+            rand (bool): random playback state
+
+        """
+        if name in self.sequences:
+
+            self.sequences[name].random = bool(rand)
+
+
+
     @API('/Sequence/Add/Random')
     def sequence_add_random(self, name, steps, n_steps):
         """

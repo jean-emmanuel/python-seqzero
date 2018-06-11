@@ -3,6 +3,8 @@
 from .utils import KillableThread as Thread
 from .timer import Timer
 
+from random import randint
+
 class Sequence(object):
     """
     Sequence: event loop synchronized by the sequencer's tempo
@@ -14,6 +16,8 @@ class Sequence(object):
         self.steps = steps
         self.beats = len(self.steps)
         self.playing = False
+        self.random = False
+        self.last_random = -1
 
     def toggle(self, state):
 
@@ -36,7 +40,17 @@ class Sequence(object):
         if not self.playing:
             return None
 
-        step = self.steps[step%self.beats] if type(step) is int else step
+        if type(step) is int:
+
+            if self.random and divider == 1:
+                cursor = -1
+                while cursor == -1 or cursor == self.last_random:
+                    cursor = randint(0, self.beats - 1)
+                self.last_random = cursor
+            else:
+                cursor = step % self.beats
+
+            step = self.steps[cursor]
 
         if step is None:
             return
