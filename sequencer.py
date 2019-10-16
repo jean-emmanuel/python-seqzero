@@ -390,7 +390,7 @@ class Sequencer(object):
     """
 
     @API('/Scene/Play', True)
-    def scene_play(self, name, timestamp=None):
+    def scene_play(self, name, a1=None, a2=None, a3=None, a4=None, a5=None, a6=None, timestamp=None):
         """
         Start a scene (restart it if its already playing)
 
@@ -399,6 +399,8 @@ class Sequencer(object):
             timestamp   (float): time reference as returned by liblo.time()
 
         OSC:
+            a1...6   (anything): optionnal argument to pass to the scene
+                                 the scene definition must accept these extra args 
             timestamp (timetag): time reference as returned by liblo.time()
                                  passing this ensures the time reference is set to the sending time
                                  this will only work if the time function is consistent accross sender and receiver
@@ -409,7 +411,22 @@ class Sequencer(object):
             self.scene_stop(name)
 
         if name in self.scenes_list:
-            self.scenes[name] = Thread(target=self.scenes_list[name], args=[self, Timer(self, timestamp)])
+            args = [self, Timer(self, timestamp)]
+
+            if a1 is not None:
+                args.append(a1)
+                if a2 is not None:
+                    args.append(a2)
+                    if a3 is not None:
+                        args.append(a3)
+                        if a4 is not None:
+                            args.append(a4)
+                            if a5 is not None:
+                                args.append(a5)
+                                if a6 is not None:
+                                    args.append(a6)
+
+            self.scenes[name] = Thread(target=self.scenes_list[name], args=args)
             self.scenes[name].start()
 
 
