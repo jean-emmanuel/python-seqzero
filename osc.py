@@ -74,6 +74,7 @@ class Server(ServerThread):
 
                 if len(types) and types[-1] == 't':
                     timestamp = arguments[-1]
+                    del arguments[-1]
                 else:
                     timestamp = Timer.time()
 

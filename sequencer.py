@@ -400,7 +400,7 @@ class Sequencer(object):
 
         OSC:
             a1...6   (anything): optionnal argument to pass to the scene
-                                 the scene definition must accept these extra args 
+                                 the scene definition must accept these extra args
             timestamp (timetag): time reference as returned by liblo.time()
                                  passing this ensures the time reference is set to the sending time
                                  this will only work if the time function is consistent accross sender and receiver

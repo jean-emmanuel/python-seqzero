@@ -16,9 +16,8 @@ class Scenes():
     def test(self, seq, timer, *args):
 
         print('Extra args: ', args)
-        # -> ('Extra args: ', (1, 'hello', 3780243530.077733))
-        # seq.send automatically appends a timestamp argument
-        # hence the 3rd extra arg
+        # print('Extra args: ', 'no')
+        # -> ('Extra args: ', (1, 'hello'))
 
 
 seq = Sequencer(bpm=240, port=12345, target='localhost:9900', scenes=Scenes())
